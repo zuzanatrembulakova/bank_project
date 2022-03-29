@@ -1,0 +1,222 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://kit.fontawesome.com/b08a3acf90.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+	<title>Bank</title>
+	</head>
+
+	{% if request.user.is_authenticated %}
+	<header>
+		<h1>Bank app</h1>
+		<section>
+			<div>
+				<h2>Welcome, {{ request.user.username }}!</h2>
+				<p>Logged in as: {{ usertype }}</p>
+			</div>
+			<div>
+                <a href="{% url 'bank_app:index' %}" class="home_btn home_btn_selected"><i class="fa-solid fa-house"></i></a>
+                <a href="{% url 'bank_app:logout' %}" class="border_btn" id="logout">Logout</a>
+            </div>
+		</section>
+	</header>
+
+		{% if usertype == "BANKER" %}
+		<main class="main">
+			<section id="create_cust">
+				<h3>Create customer</h3>
+				<form method="POST">
+					{% csrf_token %}
+					<div class="form_item_wrapper">
+						<label>User Name</label>
+						<input type="text" name="name" placeholder="Type new user name" required>
+					</div>
+					<div class="form_item_wrapper">
+						<label>Password</label>
+						<input type="password" name="password" placeholder="Type new password for the user" required>
+					</div>
+					<div class="form_item_wrapper">
+						<label>Phone</label>
+						<input type="text" name="phone" pattern="[0-9]{8}" placeholder="User's phone (8 digits)" required>
+					</div>
+					<button formaction="{% url 'bank_app:create_customer' %}" class="btn">Create customer</button>
+				</form>
+			</section>
+
+			<section id="cust_list">
+				<h3>Customer list</h3>
+				<p>Number of customers: {{ customer_count }}</p>
+
+				<table>
+					<tr>
+						<th></th>
+						<th>User Name</th>
+						<th>Phone</th>
+						<th>Ranking</th>
+						<th></th>
+					</tr>
+				{% for c in customers %}
+				{% if forloop.counter|divisibleby:2 %}
+					<tr class="white_bg">
+				{% else %}	
+					<tr>
+				{% endif %}	
+						<form method="POST">
+							{% csrf_token %}
+								<input type="hidden" name="pk" value="{{ c.pk }}">
+								<td>{{ forloop.counter }}</td>
+								<td>{{ c.user.username }}</td>
+								<td>{{ c.phone }}</td>
+								<td>
+									<select name="ranking">
+										{% for r in rankings %}
+											{% if r.rType == c.ranking.rType %}											
+												<option value="{{ r.rType }}" selected>{{ r.rType }}</option>
+											{% else %}
+											<option value="{{ r.rType }}">{{ r.rType }}</option>
+											{% endif %}
+										{% endfor %}
+									</select>
+									<button formaction="{% url 'bank_app:update_ranking' %}" class="simple_btn">Update</button>
+								</td>
+								<td><button formaction="{% url 'bank_app:accounts' %}" class="btn">Manage accounts</button></td>
+								<td>
+									<button formaction="{% url 'bank_app:del_customer' %}" class="icon_btn del_btn">
+										<i class="fa-solid fa-trash"></i>
+									</button>
+								</td>
+						</form>
+					</tr>
+				{% endfor %}
+				</table>
+			</section>
+		</main>
+		{% else %}
+
+		<main class="main">
+			<section id="transfer_section">
+				<h3>Transfer between accounts</h3>
+				<form method="POST">
+					{% csrf_token %}
+
+					<div class="form_item_wrapper">
+						<label>From account</label>
+						<select name="from_account">
+							<option disabled selected value> -- select an option -- </option>
+							{% for a in customer_accounts %}									
+								<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+							{% endfor %}
+						</select>
+					</div>
+
+					<div class="form_item_wrapper">
+						<label>To account</label>
+						<input type="text" name="to_account" placeholder="Recipient's account number">
+					</div>
+					<div class="form_item_wrapper">
+						<label>Amount</label>
+						<input type="number" name="amount" placeholder="Amount to transfer">
+					</div>
+					<div class="form_item_wrapper">
+						<label>Description</label>
+						<input type="text" name="description" placeholder="Text for transaction">
+					</div>
+					<button formaction="{% url 'bank_app:logout' %}" class="btn">Transfer Money</button>
+				</form>
+			</section>
+
+			<section id="account_overview">
+				<h3>{{ request.user.username }}'s accounts overview</h3>
+				<table>
+					<tr>
+						<th></th>
+						<th>Account Number</th>
+						<th>Balance</th>
+						<th>Loan</th>
+					</tr>
+
+					{% for a in customer_accounts %}
+					{% if forloop.counter|divisibleby:2 %}
+						<tr class="white_bg">
+					{% else %}	
+						<tr>
+					{% endif %}	
+					
+						<form method="POST">
+							{% csrf_token %}
+								<input type="hidden" name="pk" value="{{ a.pk }}">
+								<td>{{ forloop.counter }}</td>
+								<td>{{ a.accountNumber }}</td>
+								<td>
+									{% for b in balances %}
+										{% if b.0 == a.pk %}
+											{{ b.1 }}
+										{% endif %}
+									{% endfor %}
+								</td>
+								<td>
+									{% if active_customer.ranking.loan == True %}
+										<button formaction="{% url 'bank_app:del_account' %}" class="simple_btn">
+											Request
+										</button>
+									{% else %}
+										<p>Not available</p>
+									{% endif %}
+								</td>
+								<td>
+									<button formaction="{% url 'bank_app:show_movements' %}" class="btn">Show movements</button>
+								</td>
+						</form>
+					</tr>
+					{% endfor %}
+				</table>
+			</section>
+		</main>
+		{% endif%}
+
+	{% else %}
+
+	<header class="login_header">
+		<h1>Bank app</h1>
+		<section class="login_section">
+			<form method='POST'>
+				<h2>Log in</h2>
+				{% csrf_token %}
+				<div class="form_item_wrapper">
+					<label>User Name</label>
+					<input type="text" name="name" placeholder="Type your user name">
+				</div>
+				<div class="form_item_wrapper">
+					<label>Password</label>
+					<input type="password" name="password" placeholder="Type your password">
+				</div>
+				<button formaction="{% url 'bank_app:login' %}" class="btn">Login</button>
+			</form>
+		</section>
+	</header>
+
+	{% if error %}
+		<div class="modal" id="modal_error">
+			<div class="modal_bg">
+				<div id="error_content">
+
+					<button id="close" onclick="closeModal('error')">&times;</button>
+					
+					<p>{{ error }}</p>
+												
+				</div>
+			</div>
+		</div> 
+	{% endif %}
+
+	{% endif %}
+
+	<script src="{% static 'script/script.js' %}"></script>
+
+	</body>
+</html>
