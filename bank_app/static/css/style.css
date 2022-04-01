@@ -168,11 +168,9 @@ header p{
     font-size: 14px;
 }
 
-.form_item_wrapper > input{
+input{
     background-color: transparent;
     border: none;
-}
-.form_item_wrapper > input{
     background-color: #ffffff;
     padding: 10px 5px;
 }
@@ -208,6 +206,10 @@ td{
 }
 .white_bg{
     background: #ffffff;
+}
+
+#account_overview > table .simple_btn{
+    margin-left: 1rem;
 }
 
 #movements_section table{

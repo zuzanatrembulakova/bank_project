@@ -126,7 +126,7 @@
 						<label>Description</label>
 						<input type="text" name="description" placeholder="Text for transaction">
 					</div>
-					<button formaction="{% url 'bank_app:logout' %}" class="btn">Transfer Money</button>
+					<button formaction="{% url 'bank_app:transfer_money' %}" class="btn">Transfer Money</button>
 				</form>
 			</section>
 
@@ -161,6 +161,7 @@
 								</td>
 								<td>
 									{% if active_customer.ranking.loan == True %}
+										<input type="number" placeholder="Amount to loan">
 										<button formaction="{% url 'bank_app:del_account' %}" class="simple_btn">
 											Request
 										</button>

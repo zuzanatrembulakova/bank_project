@@ -20,7 +20,7 @@
 				<p>Logged in as: {{ usertype }}</p>
 			</div>
 			<div>
-                <a href="{% url 'bank_app:index' %}" class="home_btn home_btn_selected"><i class="fa-solid fa-house"></i></a>
+                <a href="{% url 'bank_app:index' %}" class="home_btn"><i class="fa-solid fa-house"></i></a>
                 <a href="{% url 'bank_app:logout' %}" class="border_btn" id="logout">Logout</a>
             </div>
 		</section>
@@ -36,18 +36,19 @@
 						<th>Amount</th>
 						<th>Description</th>
 					</tr>
-                    <tr>
-                        {% for am in account_movements %}
+                   {% for am in account_movements %}
+				   		<tr>
                             <th>{{ forloop.counter }}</th>
                             <th>{{ am.timestamp }}</th>
                             {% if am.value > 0 %}
                                 <th class="green_text">+{{ am.value }}</th>
                             {% else %}
-                                <th>-{{ am.value }}</th>
+                                <th>{{ am.value }}</th>
                             {% endif %}
                             <th>{{ am.description }}</th>
-                        {% endfor %}
-                    </tr>
+						</tr>
+                    {% endfor %}
+                    
 				</table>
             </section>
 		</main>

@@ -33,7 +33,7 @@ def index(request):
             
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
-            context['balances']= balances
+            context['balances'] = balances
 
     return render(request, 'bank_app/index.html', context)
 
@@ -167,14 +167,54 @@ def show_movements(request):
     pk = request.POST['pk']
 
     account = get_object_or_404(Account, pk=pk)
+    balance = get_balance_for_account(account)
     account_movements = AccountMovement.objects.filter(account=account)
 
     context = {
             'usertype': get_user_type(request.user),
             'account': account,
+            'balance': balance,
             'account_movements': account_movements,
     }
 
     return render(request, 'bank_app/movements.html', context)
+
+def transfer_money(request):
+
+    if request.method == "POST":
+
+        from_accountpk = request.POST['from_account']
+        from_account = get_object_or_404(Account, pk=from_accountpk)
+
+        amount = int(request.POST['amount'])
+        description = request.POST['description']
+
+        from_balance = get_balance_for_account(from_account)
+
+        to_account = request.POST['to_account']
+        accounts = Account.objects.all() 
+        for a in accounts.iterator():
+            if a.accountNumber == to_account:
+                dest_account = a
+
+        if from_balance > amount:
+
+            movement_from = AccountMovement()
+            movement_from.account = from_account
+            movement_from.value = -amount
+            movement_from.description = description
+            movement_from.save()
+
+            movement_to = AccountMovement()
+            movement_to.account = dest_account
+            movement_to.value = amount
+            movement_to.description = description
+            movement_to.save()
+
+        else:
+            print('Insufficient funds')
+
+    return HttpResponseRedirect(reverse('bank_app:index'))
+
 
 
