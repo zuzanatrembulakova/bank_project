@@ -199,17 +199,20 @@ def transfer_money(request):
 
         if from_balance > amount:
 
-            movement_from = AccountMovement()
-            movement_from.account = from_account
-            movement_from.value = -amount
-            movement_from.description = description
-            movement_from.save()
+            try:
+                movement_from = AccountMovement()
+                movement_from.account = from_account
+                movement_from.value = -amount
+                movement_from.description = description
+                movement_from.save()
 
-            movement_to = AccountMovement()
-            movement_to.account = dest_account
-            movement_to.value = amount
-            movement_to.description = description
-            movement_to.save()
+                movement_to = AccountMovement()
+                movement_to.account = dest_account
+                movement_to.value = amount
+                movement_to.description = description
+                movement_to.save()
+            except:
+                print('Transaction failed')
 
         else:
             print('Insufficient funds')
