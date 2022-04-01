@@ -3,10 +3,14 @@ from django.shortcuts import render, get_object_or_404
 from .models import Customer, Account, Ranking, AccountMovement, BankAccount, Loan
 from django.contrib.auth import authenticate, login as dj_login, logout as dj_logout
 from django.http import HttpResponseRedirect
+from django.db import IntegrityError, transaction
 
 from .views_common import *
 
 def index(request):
+    return show_index(request)
+
+def show_index(request, message='', is_error=False):
     context = {}
 
     if request.user.is_authenticated:
@@ -16,6 +20,8 @@ def index(request):
         context = {
             'usertype': get_user_type(request.user),
             'rankings': rankings,
+            'message': message,
+            'is_error': is_error,
         }
 
         if get_user_type(request.user) == 'BANKER':
@@ -179,7 +185,10 @@ def show_movements(request):
 
     return render(request, 'bank_app/movements.html', context)
 
+@transaction.atomic 
 def transfer_money(request):
+    message = 'Success'
+    is_error = False
 
     if request.method == "POST":
 
@@ -200,24 +209,28 @@ def transfer_money(request):
         if from_balance > amount:
 
             try:
-                movement_from = AccountMovement()
-                movement_from.account = from_account
-                movement_from.value = -amount
-                movement_from.description = description
-                movement_from.save()
+                with transaction.atomic():
+                    movement_from = AccountMovement()
+                    movement_from.account = from_account
+                    movement_from.value = -amount
+                    movement_from.description = description
+                    movement_from.save()
 
-                movement_to = AccountMovement()
-                movement_to.account = dest_account
-                movement_to.value = amount
-                movement_to.description = description
-                movement_to.save()
-            except:
+                    movement_to = AccountMovement()
+                    movement_to.account = dest_account
+                    movement_to.value = amount
+                    movement_to.description = description
+                    movement_to.save()
+
+            except IntegrityError:
+                message = 'Transaction failed'
+                is_error = True
                 print('Transaction failed')
 
         else:
             print('Insufficient funds')
 
-    return HttpResponseRedirect(reverse('bank_app:index'))
+    return show_index(request, message, is_error)
 
 
 
