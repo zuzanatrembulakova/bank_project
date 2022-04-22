@@ -150,6 +150,7 @@
 						<form method="POST">
 							{% csrf_token %}
 								<input type="hidden" name="pk" value="{{ a.pk }}">
+								<input type="hidden" name="customer_pk" value="{{ active_customer.pk }}">
 								<td>{{ forloop.counter }}</td>
 								<td>{{ a.accountNumber }}</td>
 								<td>
@@ -161,8 +162,8 @@
 								</td>
 								<td>
 									{% if active_customer.ranking.loan == True %}
-										<input type="number" placeholder="Amount to loan">
-										<button formaction="{% url 'bank_app:del_account' %}" class="simple_btn">
+										<input type="number" placeholder="Amount to loan" name="loan_amount">
+										<button formaction="{% url 'bank_app:request_loan' %}" class="simple_btn">
 											Request
 										</button>
 									{% else %}

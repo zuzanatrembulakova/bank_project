@@ -43,7 +43,7 @@ class BankAccount(models.Model):
 
 class Loan(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    bankAccount = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     loanAmount = models.IntegerField()
     remainingAmount = models.IntegerField()
     confirmed = models.BooleanField(default=False)

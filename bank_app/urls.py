@@ -19,4 +19,6 @@ urlpatterns = [
 
         path('show_movements/', views.show_movements, name='show_movements'),
         path('transfer_money/', views.transfer_money, name='transfer_money'),
+
+        path('request_loan/', views.request_loan, name='request_loan'),
 ]

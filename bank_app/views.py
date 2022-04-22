@@ -240,5 +240,21 @@ def transfer_money(request):
 
     return show_index(request, message, is_error)
 
+def request_loan(request):
+    pk = request.POST['pk']
+    loan_amount = request.POST['loan_amount']
+    customer = get_object_or_404(Customer, pk=request.POST['customer_pk'])
+    account = get_object_or_404(Account, pk=pk)
+    print("Account: ", account)
+  
+    loan = Loan()
+    loan.customer = customer
+    loan.account = account
+    loan.loanAmount = loan_amount
+    loan.remainingAmount = loan_amount
+    loan.save()
+    
+    return HttpResponseRedirect(reverse('bank_app:index'))
+
 
 
