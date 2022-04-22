@@ -31,6 +31,8 @@ def show_index(request, message='', is_error=False):
         if get_user_type(request.user) == 'CUSTOMER':
             active_customer = Customer.objects.get(user = request.user)
             customer_accounts = Account.objects.filter(customer=active_customer) 
+            loans = Loan.objects.filter(customer=active_customer)
+            print(loans)
 
             balances = []
             for a in customer_accounts.iterator():
@@ -121,7 +123,7 @@ def accounts(request):
             'balances': balances,
     }
 
-    print(account_movement)
+    # print(account_movement)
     return render(request, 'bank_app/accounts.html', context)
 
 def add_account(request):
