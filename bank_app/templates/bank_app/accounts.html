@@ -69,9 +69,9 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ a.accountNumber }}</td>
                             <td>
-                                {% for am in account_movement %}
-                                    {% if am.account == a %}
-                                        {{ am.value }}
+                                {% for b in balances %}
+                                    {% if b.0 == a.pk %}
+                                        {{ b.1 }}
                                     {% endif %}
                                 {% endfor %}
                             </td>

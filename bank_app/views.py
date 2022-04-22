@@ -108,11 +108,17 @@ def accounts(request):
         accounts = Account.objects.filter(customer=customer)
         account_movement = AccountMovement.objects.all()
 
+        balances = []
+        for a in accounts.iterator():
+            balance = get_balance_for_account(a)
+            balances.append( (a.pk, balance) )
+
     context = {
             'usertype': get_user_type(request.user),
             'customer': customer,
             'accounts': accounts,
             'account_movement': account_movement,
+            'balances': balances,
     }
 
     print(account_movement)
