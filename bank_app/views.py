@@ -146,10 +146,16 @@ def add_account(request):
     account_movement = AccountMovement.objects.all()
     accounts = Account.objects.filter(customer=customer)
 
+    balances = []
+    for a in accounts.iterator():
+        balance = get_balance_for_account(a)
+        balances.append( (a.pk, balance) )
+
     context = {
             'customer': customer,
             'accounts': accounts,
             'account_movement': account_movement,
+            'balances': balances,
     }
 
     return render(request, 'bank_app/accounts.html', context)

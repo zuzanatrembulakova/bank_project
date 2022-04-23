@@ -4,9 +4,11 @@ from rest_framework import status
 
 class ExternalTransaction(APIView):
     def post(self, request, *args, **kwargs):
-        print('Rest post')
         
-        print(request.data)
+        to_account = request.data.get('to_account')
+        print(to_account)
+
+        
         return Response(
                     {"res": "OK"},
                     status=status.HTTP_200_OK
