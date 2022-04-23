@@ -9,4 +9,6 @@ REST
 
 - exchange money between two banks in different currencies
 
+To do
+- dorobit vypis messages pri transaction
 

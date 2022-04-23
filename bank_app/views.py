@@ -213,34 +213,37 @@ def transfer_money(request):
         from_balance = get_balance_for_account(from_account)
 
         to_account = request.POST['to_account']
-        accounts = Account.objects.all() 
-        for a in accounts.iterator():
-            if a.accountNumber == to_account:
-                dest_account = a
-
-        if from_balance > amount:
-
-            try:
-                with transaction.atomic():
-                    movement_from = AccountMovement()
-                    movement_from.account = from_account
-                    movement_from.value = -amount
-                    movement_from.description = description
-                    movement_from.save()
-
-                    movement_to = AccountMovement()
-                    movement_to.account = dest_account
-                    movement_to.value = amount
-                    movement_to.description = description
-                    movement_to.save()
-
-            except IntegrityError:
-                message = 'Transaction failed'
-                is_error = True
-                print('Transaction failed')
-
+        
+        if not Account.objects.filter(accountNumber = to_account):
+            print('Account doesnt exist')
+            message = "Destination account dosen't exist"
         else:
-            print('Insufficient funds')
+            dest_account = get_object_or_404(Account, accountNumber = to_account) 
+            print(dest_account)
+
+            if from_balance > amount:
+
+                try:
+                    with transaction.atomic():
+                        movement_from = AccountMovement()
+                        movement_from.account = from_account
+                        movement_from.value = -amount
+                        movement_from.description = description
+                        movement_from.save()
+
+                        movement_to = AccountMovement()
+                        movement_to.account = dest_account
+                        movement_to.value = amount
+                        movement_to.description = description
+                        movement_to.save()
+
+                except IntegrityError:
+                    message = 'Transaction failed'
+                    is_error = True
+                    print('Transaction failed')
+
+            else:
+                print('Insufficient funds')
 
     return show_index(request, message, is_error)
 
