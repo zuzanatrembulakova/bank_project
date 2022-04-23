@@ -171,10 +171,16 @@ def del_account(request):
     accounts = Account.objects.filter(customer=customer)
     account_movement = AccountMovement.objects.all()
 
+    balances = []
+    for a in accounts.iterator():
+        balance = get_balance_for_account(a)
+        balances.append( (a.pk, balance) )
+
     context = {
             'customer': customer,
             'accounts': accounts,
             'account_movement': account_movement,
+            'balances': balances,
     }
 
     return render(request, 'bank_app/accounts.html', context)
@@ -215,6 +221,7 @@ def transfer_money(request):
         to_account = request.POST['to_account']
         
         if not Account.objects.filter(accountNumber = to_account):
+            bank_code = to_account[0:4]
             print('Account doesnt exist')
             message = "Destination account dosen't exist"
         else:

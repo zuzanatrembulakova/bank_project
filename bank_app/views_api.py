@@ -13,6 +13,9 @@ class ExternalTransaction(APIView):
         amount = request.data.get('amount')
         description = request.data.get('description')
 
+        bank_code = to_account[0:4]
+        print(bank_code)
+
         if not Account.objects.filter(accountNumber = to_account):
             print('Account doesnt exist')
             res = 'Account doesnt exist'

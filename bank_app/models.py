@@ -35,11 +35,11 @@ class AccountMovement(models.Model):
         return f"{self.value} - {self.timestamp} - {self.description}"
 
 class Bank(models.Model):
-    bankCode = models.IntegerField()
+    bankCode = models.CharField(max_length=4)
     path = models.CharField(max_length=250)
     
     def __str__(self):
-        return f"{self.bankCode} - self{self.path}"
+        return f"{self.bankCode} - {self.path}"
 
 class Loan(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
