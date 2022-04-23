@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, views_api
 
 app_name = 'bank_app'
 
@@ -19,4 +19,6 @@ urlpatterns = [
 
         path('show_movements/', views.show_movements, name='show_movements'),
         path('transfer_money/', views.transfer_money, name='transfer_money'),
+
+        path('api/external_transaction/', views_api.ExternalTransaction.as_view()),
 ]
