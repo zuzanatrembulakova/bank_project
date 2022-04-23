@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login as dj_login, logout as dj_lo
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
 
+import requests
+
 from .views_common import *
 
 def index(request):
@@ -219,13 +221,32 @@ def transfer_money(request):
         from_balance = get_balance_for_account(from_account)
 
         to_account = request.POST['to_account']
+
+        dest_account = Account.objects.filter(accountNumber = to_account)
         
-        if not Account.objects.filter(accountNumber = to_account):
+        if not dest_account:
             bank_code = to_account[0:4]
-            print('Account doesnt exist')
-            message = "Destination account dosen't exist"
-        else:
-            dest_account = get_object_or_404(Account, accountNumber = to_account) 
+
+            bank = get_object_or_404(Bank, bankCode = bank_code)
+            url = bank.path + '/bank/api/ExternalTransaction'
+            print(url)
+
+            data = {
+                    "to_account": to_account,
+                    "amount": amount,
+                    "description": description,
+                    }
+            print(data)
+
+            response = requests.post(url, data=data)
+
+            if response.status_code == 200:
+                print('Success!')
+                message = response.res
+            elif response.status_code == 404:
+                print('Not Found.')
+                message = response.res
+        else: 
             print(dest_account)
 
             if from_balance > amount:
@@ -239,7 +260,7 @@ def transfer_money(request):
                         movement_from.save()
 
                         movement_to = AccountMovement()
-                        movement_to.account = dest_account
+                        movement_to.account = dest_account[0]
                         movement_to.value = amount
                         movement_to.description = description
                         movement_to.save()

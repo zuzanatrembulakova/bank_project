@@ -1,5 +1,7 @@
 py-venv\Scripts\activate
 
+pip install requests (aby sme v pythone vedeli robit requests)
+
 REST
 - transaction between two banks
 - two instances of the same bank (run docker-compose in one folder and in second one)

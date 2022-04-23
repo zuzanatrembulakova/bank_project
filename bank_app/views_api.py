@@ -19,6 +19,10 @@ class ExternalTransaction(APIView):
         if not Account.objects.filter(accountNumber = to_account):
             print('Account doesnt exist')
             res = 'Account doesnt exist'
+            return Response(
+                    {"res": res},
+                    status=status.HTTP_404_NOT_FOUND
+                )
         else:
 
             account = get_object_or_404(Account, accountNumber = to_account)
@@ -33,9 +37,6 @@ class ExternalTransaction(APIView):
             res = 'Transaction successful'
         
         return Response(
-                    {
-                        "res": res
-                    },
-
+                    {"res": res },
                     status=status.HTTP_200_OK
                 )
