@@ -16,27 +16,25 @@ class ExternalTransaction(APIView):
         bank_code = to_account[0:4]
         print(bank_code)
 
-        if not Account.objects.filter(accountNumber = to_account):
+        account = Account.objects.filter(accountNumber = to_account)
+
+        if not account:
             print('Account doesnt exist')
             res = 'Account doesnt exist'
-            return Response(
-                    {"res": res},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            rec_code = status.HTTP_404_NOT_FOUND
+    
         else:
 
-            account = get_object_or_404(Account, accountNumber = to_account)
-            print(account)
-
             account_movement = AccountMovement()
-            account_movement.account = account
+            account_movement.account = account[0]
             account_movement.value = amount
             account_movement.description = description
             account_movement.save()
 
             res = 'Transaction successful'
+            rec_code = status.HTTP_200_OK
         
         return Response(
                     {"res": res },
-                    status=status.HTTP_200_OK
+                    status=rec_code
                 )

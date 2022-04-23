@@ -228,7 +228,7 @@ def transfer_money(request):
             bank_code = to_account[0:4]
 
             bank = get_object_or_404(Bank, bankCode = bank_code)
-            url = bank.path + '/bank/api/ExternalTransaction'
+            url = 'http://' + bank.path + '/bank/api/external_transaction/'
             print(url)
 
             data = {
@@ -239,13 +239,20 @@ def transfer_money(request):
             print(data)
 
             response = requests.post(url, data=data)
-
+            print(response.status_code)
             if response.status_code == 200:
                 print('Success!')
-                message = response.res
+
+                account_movement = AccountMovement()
+                account_movement.account = from_account
+                account_movement.value = -amount
+                account_movement.description = description
+                account_movement.save()
+
+                message = response.json()['res']
             elif response.status_code == 404:
                 print('Not Found.')
-                message = response.res
+                message = response.json()['res']
         else: 
             print(dest_account)
 
