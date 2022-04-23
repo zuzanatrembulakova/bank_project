@@ -34,16 +34,16 @@ class AccountMovement(models.Model):
     def __str__(self):
         return f"{self.value} - {self.timestamp} - {self.description}"
 
-class BankAccount(models.Model):
-    accountNumber = models.CharField(max_length=20)
-    balance = models.IntegerField()
+class Bank(models.Model):
+    bankCode = models.IntegerField()
+    path = models.CharField(max_length=250)
     
     def __str__(self):
-        return f"{self.balance} - self{self.accountNumber}"
+        return f"{self.bankCode} - self{self.path}"
 
 class Loan(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    bankAccount = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     loanAmount = models.IntegerField()
     remainingAmount = models.IntegerField()
     confirmed = models.BooleanField(default=False)

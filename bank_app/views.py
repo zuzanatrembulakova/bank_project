@@ -1,6 +1,6 @@
 from django.shortcuts import render, reverse
 from django.shortcuts import render, get_object_or_404
-from .models import Customer, Account, Ranking, AccountMovement, BankAccount, Loan
+from .models import *
 from django.contrib.auth import authenticate, login as dj_login, logout as dj_logout
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
@@ -121,7 +121,7 @@ def accounts(request):
             'balances': balances,
     }
 
-    print(account_movement)
+    # print(account_movement)
     return render(request, 'bank_app/accounts.html', context)
 
 def add_account(request):
