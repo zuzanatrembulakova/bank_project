@@ -102,13 +102,18 @@ def update_ranking(request):
     return HttpResponseRedirect(reverse('bank_app:index'))
 
 def accounts(request):
+    if request.method == "POST":
+        pkcust = request.POST['pk']
+
+    return show_accounts(request, pkcust)
+
+def show_accounts(request, pkcust):
     context = {}
 
     if request.user.is_authenticated and get_user_type(request.user) == "BANKER":
-        pk = request.POST['pk']
-        customer = get_object_or_404(Customer, pk=pk)
+        
+        customer = get_object_or_404(Customer, pk=pkcust)
         accounts = Account.objects.filter(customer=customer)
-        account_movement = AccountMovement.objects.all()
 
         balances = []
         for a in accounts.iterator():
@@ -119,7 +124,6 @@ def accounts(request):
             'usertype': get_user_type(request.user),
             'customer': customer,
             'accounts': accounts,
-            'account_movement': account_movement,
             'balances': balances,
     }
 
@@ -127,12 +131,12 @@ def accounts(request):
     return render(request, 'bank_app/accounts.html', context)
 
 def add_account(request):
-    pk = request.POST['pk']
+    pkcust = request.POST['pk']
 
     account_number = request.POST['number']
     balance = request.POST['balance']
 
-    customer = get_object_or_404(Customer, pk=pk)
+    customer = get_object_or_404(Customer, pk=pkcust)
 
     account = Account()
     account.customer = customer
@@ -145,22 +149,7 @@ def add_account(request):
     account_movement.description = "Initial balance"
     account_movement.save()
 
-    account_movement = AccountMovement.objects.all()
-    accounts = Account.objects.filter(customer=customer)
-
-    balances = []
-    for a in accounts.iterator():
-        balance = get_balance_for_account(a)
-        balances.append( (a.pk, balance) )
-
-    context = {
-            'customer': customer,
-            'accounts': accounts,
-            'account_movement': account_movement,
-            'balances': balances,
-    }
-
-    return render(request, 'bank_app/accounts.html', context)
+    return show_accounts(request, pkcust)
 
 def del_account(request):
     pk = request.POST['pk']
@@ -169,23 +158,7 @@ def del_account(request):
     account = get_object_or_404(Account, pk=pk)
     account.delete()
 
-    customer = get_object_or_404(Customer, pk=pkcust)
-    accounts = Account.objects.filter(customer=customer)
-    account_movement = AccountMovement.objects.all()
-
-    balances = []
-    for a in accounts.iterator():
-        balance = get_balance_for_account(a)
-        balances.append( (a.pk, balance) )
-
-    context = {
-            'customer': customer,
-            'accounts': accounts,
-            'account_movement': account_movement,
-            'balances': balances,
-    }
-
-    return render(request, 'bank_app/accounts.html', context)
+    return show_accounts(request, pkcust)
 
 def show_movements(request):
     context = {}
