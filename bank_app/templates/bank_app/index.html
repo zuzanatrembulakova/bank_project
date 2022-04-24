@@ -126,6 +126,21 @@
 						<label>Description</label>
 						<input type="text" name="description" placeholder="Text for transaction">
 					</div>
+					<div id="automatic_payment_wrapper" class="form_item_wrapper">
+						<label>Set as automatic payment</label>
+						<input type="checkbox" id="aut_payment_check" onclick="showAutomaticPayment()">
+					</div>
+					<div id="automatic_payment_details">
+						<div class="form_item_wrapper">
+							<label>Repeat every</label>
+							<input type="number" name="repeat_number" value="1" min="1" max="59">
+							<select name="repeat_time">							
+								<option value="second">Second</option>
+								<option value="minute">Minute</option>
+								<option value="hour">Hour</option>
+							</select>
+						</div>
+					</div>
 					<button formaction="{% url 'bank_app:transfer_money' %}" class="btn">Transfer Money</button>
 				</form>
 			</section>

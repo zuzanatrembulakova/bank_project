@@ -143,7 +143,7 @@ header p{
     margin: 2rem 0;
 }
 
-.main > section:first-child h3{
+.main > section:first-child h3, #automatic_payment h3{
     margin-left: 2rem;
 }
 
@@ -151,6 +151,35 @@ header p{
     display: flex;
     flex-direction: column;
     margin: 2rem 2rem;
+}
+
+#automatic_payment_wrapper.form_item_wrapper{
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    margin-bottom: .5rem;
+}
+#aut_payment_check{
+    cursor: pointer;
+    margin-left: .5rem;
+    margin-bottom: 3.5px;
+}
+#automatic_payment_details{
+    display: none;
+}
+#automatic_payment_details .form_item_wrapper{
+    margin-top: .5rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+#automatic_payment_details .form_item_wrapper input{
+    width: 100px;
+    text-align: center;
+    padding: 5px ;
+}
+#automatic_payment_details .form_item_wrapper select{
+    width: 150px;
 }
 
 .login_section .form_item_wrapper{
@@ -178,7 +207,7 @@ input{
     outline: none;
 }
 
-.main > section:first-child .btn{
+.main > section:first-child .btn, #automatic_payment .btn{
     margin-left: 2rem;
 }
 
