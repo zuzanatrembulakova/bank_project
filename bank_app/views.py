@@ -332,7 +332,7 @@ def pay_loan(request):
         loan = Loan.objects.get(pk = pk)
 
         if amount > int(remaining_amount):
-            print('The entered amount exceeds the loan amount')
+            print('The entered amount exceeds the loan')
         
         elif from_balance > amount:
 
