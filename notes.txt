@@ -6,7 +6,7 @@ REST
 - transaction between two banks
 - two instances of the same bank (run docker-compose in one folder and in second one)
 
-- chroneDom?????
+- chroneDom????? asi cron job
 - v jeho bank project ma nejake management commands
 
 - exchange money between two banks in different currencies
