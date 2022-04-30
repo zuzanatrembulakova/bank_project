@@ -14,7 +14,7 @@ REST
 To do
 - confirmed - moze byt charfield alebo boolean????
 - moze byt javascript????
-- multifactor - sms, ci moze byt console backend/filebackend
+- multifactor - sms, ci moze byt console backend/filebackend, moze byt email????
 - dorobit vypis messages pri transaction
 
 - cervenym vydaje
