@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 
-
 class Ranking(models.Model):
     rType = models.CharField(max_length=200)
     loan = models.BooleanField(default=False)
