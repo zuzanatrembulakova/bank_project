@@ -21,4 +21,10 @@ urlpatterns = [
         path('transfer_money/', views.transfer_money, name='transfer_money'),
 
         path('api/external_transaction/', views_api.ExternalTransaction.as_view()),
+
+        path('request_loan/', views.request_loan, name='request_loan'),
+        path('decline_loan/', views.decline_loan, name='decline_loan'),
+        path('accept_loan/', views.accept_loan, name='accept_loan'),
+        path('pay_loan/', views.pay_loan, name='pay_loan'),
+        path('del_loan/', views.del_loan, name='del_loan'),
 ]

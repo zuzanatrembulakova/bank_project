@@ -46,7 +46,8 @@ class Loan(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     loanAmount = models.IntegerField()
     remainingAmount = models.IntegerField()
-    confirmed = models.BooleanField(default=False)
+    confirmed = models.CharField(max_length=100, default='undefined')
+    # confirmed = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.loanAmount} - {self.remainingAmount}"
+        return f"{self.loanAmount} - {self.remainingAmount} - {self.confirmed}"

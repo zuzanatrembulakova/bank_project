@@ -12,5 +12,11 @@ REST
 - exchange money between two banks in different currencies
 
 To do
+- confirmed - moze byt charfield alebo boolean????
+- moze byt javascript????
+- multifactor - sms, ci moze byt console backend/filebackend
 - dorobit vypis messages pri transaction
+
+- cervenym vydaje
+- reversnut datumy
 

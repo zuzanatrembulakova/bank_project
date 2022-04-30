@@ -33,6 +33,7 @@ def show_index(request, message='', is_error=False):
         if get_user_type(request.user) == 'CUSTOMER':
             active_customer = Customer.objects.get(user = request.user)
             customer_accounts = Account.objects.filter(customer=active_customer) 
+            loans = Loan.objects.filter(customer=active_customer)
 
             balances = []
             for a in customer_accounts.iterator():
@@ -42,6 +43,7 @@ def show_index(request, message='', is_error=False):
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
             context['balances'] = balances
+            context['loans'] = loans
 
     return render(request, 'bank_app/index.html', context)
 
@@ -114,6 +116,7 @@ def show_accounts(request, pkcust):
         
         customer = get_object_or_404(Customer, pk=pkcust)
         accounts = Account.objects.filter(customer=customer)
+        loans = Loan.objects.filter(customer=customer)
 
         balances = []
         for a in accounts.iterator():
@@ -125,6 +128,7 @@ def show_accounts(request, pkcust):
             'customer': customer,
             'accounts': accounts,
             'balances': balances,
+            'loans': loans,
     }
 
     # print(account_movement)
@@ -256,4 +260,108 @@ def transfer_money(request):
     return show_index(request, message, is_error)
 
 
+def request_loan(request):
+    pk = request.POST['pk']
+ 
+    loan = Loan()
+    loan.loanAmount = request.POST['loan_amount']
+    loan.remainingAmount = request.POST['loan_amount']
+    loan.account = get_object_or_404(Account, pk=pk)
+    loan.customer = Customer.objects.get(user = request.user)
+    loan.save()
 
+    print(loan)
+ 
+    return HttpResponseRedirect(reverse('bank_app:index'))
+
+@transaction.atomic
+def accept_loan(request):
+    # message = 'Success'
+    # is_error = False
+
+    if request.method == "POST":
+        # remaining_amount = request.POST['remaining_amount']
+        pk = request.POST['pk']
+        pkcust = request.POST['pkcust']
+        amount = int(request.POST['loan_amount'])
+        to_laccount = request.POST['to_laccount']
+        dest_account = Account.objects.filter(accountNumber = to_laccount)
+        # print(loan)
+        
+        loan = Loan.objects.get(pk = pk)
+
+        try:
+            with transaction.atomic():
+                movement_to = AccountMovement()
+                movement_to.account = dest_account[0]
+                movement_to.value = amount
+                movement_to.description = 'Loan'
+                movement_to.save()
+
+                loan.confirmed = 'true'
+                loan.save()
+
+        except IntegrityError:
+            message = 'Transaction failed'
+            is_error = True
+            print('Transaction failed')
+
+    return show_accounts(request, pkcust)
+
+
+def decline_loan(request):
+    pkcust = request.POST['pkcust']
+    pk = request.POST['pk']
+    loan = Loan.objects.get(pk = pk)
+    loan.confirmed = 'false'
+    loan.save()
+    return show_accounts(request, pkcust)
+
+@transaction.atomic 
+def pay_loan(request):
+    message = 'Success'
+    is_error = False
+
+    if request.method == "POST":
+        pk = request.POST['pk']
+        account = request.POST['account']
+        from_account = Account.objects.get(accountNumber = account)
+        remaining_amount = int(request.POST['remaining_amount'])
+        amount = int(request.POST['loan_transfer'])
+        from_balance = get_balance_for_account(from_account)
+        loan = Loan.objects.get(pk = pk)
+
+        if amount > int(remaining_amount):
+            print('The entered amount exceeds the loan amount')
+        
+        elif from_balance > amount:
+
+            try:
+                with transaction.atomic():
+                    movement_from = AccountMovement()
+                    movement_from.account = from_account
+                    movement_from.value = -amount
+                    movement_from.description = 'Loan payment'
+                    movement_from.save()
+
+                    loan.remainingAmount = remaining_amount - amount
+                    loan.save()
+
+            except IntegrityError:
+                message = 'Transaction  failed'
+                is_error = True
+                print('Transaction failed')
+
+        else:
+            print('Insufficient funds')
+
+    return show_index(request, message, is_error)
+
+def del_loan(request):
+    pk = request.POST['pk']
+    pkcust = request.POST['pkcust']
+
+    loan = get_object_or_404(Loan, pk=pk)
+    loan.delete()
+    
+    return show_accounts(request, pkcust)
