@@ -49,4 +49,4 @@ class Loan(models.Model):
     # confirmed = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.loanAmount} - {self.remainingAmount} - {self.confirmed}"
+        return f"{self.account} - {self.loanAmount} - {self.remainingAmount} - {self.confirmed}"
