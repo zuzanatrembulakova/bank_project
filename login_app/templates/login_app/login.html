@@ -17,14 +17,6 @@
 			<form method='POST'>
 				<h2>Log in</h2>
 				{% csrf_token %}
-				<div class="form_item_wrapper">
-					<label>User Name</label>
-					<input type="text" name="name" placeholder="Type your user name">
-				</div>
-				<div class="form_item_wrapper">
-					<label>Password</label>
-					<input type="password" name="password" placeholder="Type your password">
-				</div>
 				{% if verified == 0 %}
 					<div class="form_item_wrapper">
 						<p>We've sent a verification code to your number</p>
@@ -34,6 +26,14 @@
 					</div>
 					<button formaction="{% url 'login_app:login_verify' %}" class="btn">Login</button>
 				{% else %}
+					<div class="form_item_wrapper">
+						<label>User Name</label>
+						<input type="text" name="name" placeholder="Type your user name">
+					</div>
+					<div class="form_item_wrapper">
+						<label>Password</label>
+						<input type="password" name="password" placeholder="Type your password">
+					</div>
 					<button formaction="{% url 'login_app:login' %}" class="btn">Login</button>
 				{% endif %}
 			</form>
