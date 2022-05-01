@@ -25,7 +25,17 @@
 					<label>Password</label>
 					<input type="password" name="password" placeholder="Type your password">
 				</div>
-				<button formaction="{% url 'login_app:login' %}" class="btn">Login</button>
+				{% if verified == 0 %}
+					<div class="form_item_wrapper">
+						<p>We've sent a verification code to your number</p>
+						<label>SMS code</label>
+						<input type="number" name="code" placeholder="Type your SMS code">
+						<input type="hidden" name="codepk" value="{{ code.pk }}">
+					</div>
+					<button formaction="{% url 'login_app:login_verify' %}" class="btn">Login</button>
+				{% else %}
+					<button formaction="{% url 'login_app:login' %}" class="btn">Login</button>
+				{% endif %}
 			</form>
 		</section>
 	</header>
