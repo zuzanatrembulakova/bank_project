@@ -20,35 +20,36 @@ def login(request):
         if user:
             dj_login(request, user)
 
-            customer = Customer.objects.get(user = request.user) 
-            print(customer.phone)
+            if get_user_type(request.user) == 'CUSTOMER':
+                user = Customer.objects.get(user = request.user) 
+                print(user.phone)
 
-            sms_code = random.randint(1000,9999)
-            code = LoginCode()
-            code.code = sms_code
-            code.save()
-            print(code)
+                sms_code = random.randint(1000,9999)
+                code = LoginCode()
+                code.code = sms_code
+                code.save()
+                print(code)
 
-            # client = Client('AC19cbcef853566442dffb9784e745034d','147803e3c78223a9280f4d5b6953c1f1')
-            # message = client.messages.create(
-            #     body=f'Here is your code: {code}',
-            #     from_='+19707167454',
-            #     to='+4571803342'
-            #     to=customer.phone
-            # )
-            # print(message.body) 
+                # client = Client('AC19cbcef853566442dffb9784e745034d','147803e3c78223a9280f4d5b6953c1f1')
+                # message = client.messages.create(
+                #     body=f'Here is your code: {code}',
+                #     from_='+19707167454',
+                #     to='+4571803342'
+                #     to=user.phone
+                # )
 
-            # if (int(request.POST['sms_code']) == "") and (int(request.POST['sms_code']) == code)
+                # print(message.body) 
 
-            context = {                                                                             
-                'verified': verified,
-                'code': code
-                }
+                context = {                                                                             
+                    'verified': verified,
+                    'code': code
+                    }
+            
+            else:
+                return HttpResponseRedirect(reverse('bank_app:index'))
 
             print(f"Logged in as {userType}")
-            # return render(request, 'login_app/login.html', context)
-            # return login_verify(request, login_step, code)
-            # return HttpResponseRedirect(reverse('bank_app:index'))
+            
         else:
             print('Invalid Login')
             context = {                                                                             
