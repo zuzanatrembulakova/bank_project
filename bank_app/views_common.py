@@ -4,7 +4,6 @@ from .models import Customer, Account, AccountMovement
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
-
 def get_user_type(u:User) -> str:
     if u and u.is_authenticated:
         try:

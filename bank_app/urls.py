@@ -6,9 +6,6 @@ app_name = 'bank_app'
 urlpatterns = [
         path('', views.index, name='index'),
 
-        path('login/', views.login, name='login'),
-        path('logout/', views.logout, name='logout'),
-
         path('create_customer/', views.create_customer, name='create_customer'),
         path('del_customer/', views.del_customer, name='del_customer'),
         path('update_ranking/', views.update_ranking, name='update_ranking'),

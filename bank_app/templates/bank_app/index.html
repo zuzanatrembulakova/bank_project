@@ -21,7 +21,7 @@
 			</div>
 			<div>
                 <a href="{% url 'bank_app:index' %}" class="home_btn home_btn_selected"><i class="fa-solid fa-house"></i></a>
-                <a href="{% url 'bank_app:logout' %}" class="border_btn" id="logout">Logout</a>
+                <a href="{% url 'login_app:logout' %}" class="border_btn" id="logout">Logout</a>
             </div>
 		</section>
 	</header>
@@ -250,7 +250,7 @@
 
 	<header class="login_header">
 		<h1>Bank app</h1>
-		<section class="login_section">
+		<!-- <section class="login_section">
 			<form method='POST'>
 				<h2>Log in</h2>
 				{% csrf_token %}
@@ -262,9 +262,9 @@
 					<label>Password</label>
 					<input type="password" name="password" placeholder="Type your password">
 				</div>
-				<button formaction="{% url 'bank_app:login' %}" class="btn">Login</button>
+				<button formaction="{% url 'login_app:login' %}" class="btn">Login</button>
 			</form>
-		</section>
+		</section> -->
 	</header>
 
 	{% if error %}
