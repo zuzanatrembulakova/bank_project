@@ -20,3 +20,17 @@ To do
 - cervenym vydaje
 - reversnut datumy
 
+- novy model kde zadam automaticke platby 
+(z uctu fk, na ucet, description, 
+suma, pocet opakovani, ako casto, kolko ostava, 
+cas posledneho prevodu(aktualny cas na zaciatku), 
+
+last error message(bud prazdny ak success a inak hlaska) ) - ked je check vyrobit zaznam do tabulky
+kolko ostava > 0
+
+- vydiet zriadene automaticke platby
+- get_objetc_... zmenit cez try a exception na Account.objects.get
+- transfer money funkcia zrusit request, returne None alebo ked je chyba returne message
+
+- ked neexistuje ucet v banke ani v druhej tak co potom
+

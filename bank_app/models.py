@@ -1,3 +1,5 @@
+from sqlite3 import Timestamp
+from turtle import mode
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -50,3 +52,15 @@ class Loan(models.Model):
 
     def __str__(self):
         return f"{self.account} - {self.loanAmount} - {self.remainingAmount} - {self.confirmed}"
+
+class AutomaticPayment(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    to_account = models.CharField(max_length=250, default='undefined')
+    value = models.IntegerField()
+    description = models.TextField()
+    repeat_number = models.IntegerField(help_text="number of payment repeats")
+    repeat_every = models.IntegerField(help_text="how often should we repeat payment (in minutes)")
+    timestamp = models.DateTimeField(default=now, editable=False, help_text="time of last payment")
+
+    def __str__(self):
+        return f"{self.account} - {self.to_account} - {self.value} - {self.repeat_number} - {self.timestamp}"

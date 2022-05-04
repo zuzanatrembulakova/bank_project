@@ -128,20 +128,24 @@
 					</div>
 					<div id="automatic_payment_wrapper" class="form_item_wrapper">
 						<label>Set as automatic payment</label>
-						<input type="checkbox" id="aut_payment_check" onclick="showAutomaticPayment()">
+						<input type="checkbox" id="aut_payment_check" name="payment_check" onclick="showAutomaticPayment()">
 					</div>
 					<div id="automatic_payment_details">
 						<div class="form_item_wrapper">
 							<label>Repeat every</label>
-							<input type="number" name="repeat_number" value="1" min="1" max="59">
-							<select name="repeat_time">							
-								<option value="second">Second</option>
-								<option value="minute">Minute</option>
+							<input type="number" name="repeat_every" value="1" min="1" max="59">
+							<select name="repeat_time_unit">	
+								<!-- <option disabled selected value> -- select an option -- </option>						 -->
+								<option value="minute" selected>Minute</option>
 								<option value="hour">Hour</option>
 							</select>
 						</div>
+						<div class="form_item_wrapper">
+							<label>How many times you wish to repeat the payment?</label>
+							<input type="number" name="repeat_number" value="1" min="1">
+						</div>
 					</div>
-					<button formaction="{% url 'bank_app:transfer_money' %}" class="btn">Transfer Money</button>
+					<button formaction="{% url 'bank_app:set_transaction' %}" class="btn">Transfer Money</button>
 				</form>
 			</section>
 
@@ -248,38 +252,7 @@
 
 	{% else %}
 
-	<header class="login_header">
-		<h1>Bank app</h1>
-		<!-- <section class="login_section">
-			<form method='POST'>
-				<h2>Log in</h2>
-				{% csrf_token %}
-				<div class="form_item_wrapper">
-					<label>User Name</label>
-					<input type="text" name="name" placeholder="Type your user name">
-				</div>
-				<div class="form_item_wrapper">
-					<label>Password</label>
-					<input type="password" name="password" placeholder="Type your password">
-				</div>
-				<button formaction="{% url 'login_app:login' %}" class="btn">Login</button>
-			</form>
-		</section> -->
-	</header>
-
-	{% if error %}
-		<div class="modal" id="modal_error">
-			<div class="modal_bg">
-				<div id="error_content">
-
-					<button id="close" onclick="closeModal('error')">&times;</button>
-					
-					<p>{{ error }}</p>
-												
-				</div>
-			</div>
-		</div> 
-	{% endif %}
+		<h2>Please log in</h2>
 
 	{% endif %}
 
