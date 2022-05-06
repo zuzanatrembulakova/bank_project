@@ -26,17 +26,16 @@ class BankTestCase(TestCase):
     def test_update_ranking(self):
         c = Client()
 
-        user1 = Customer.objects.get(phone=12345678)
+        user = Customer.objects.get(phone=12345678)
         basic = Ranking.objects.get(rType='Basic')
 
         data = {
-            'pk': user1.pk,
-            'ranking': 'Basic'
+            'pk': user.pk,
+            'ranking': basic.pk
         }
 
-        result = c.post(reverse('bank_app:update_ranking'), data, follow=True)
-        print('Result', result.status_code)
-        print('User', user1.ranking)
-        print('Basic', basic)
-        self.assertEqual(user1.ranking, basic)
-        # assert user1.ranking == basic
+        c.post(reverse('bank_app:update_ranking'), data, follow=True)
+        
+        user = Customer.objects.get(phone=12345678)
+                
+        self.assertEqual(user.ranking, basic)
