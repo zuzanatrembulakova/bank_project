@@ -76,9 +76,9 @@
 									<select name="ranking">
 										{% for r in rankings %}
 											{% if r.rType == c.ranking.rType %}											
-												<option value="{{ r.rType }}" selected>{{ r.rType }}</option>
+												<option value="{{ r.pk }}" selected>{{ r.rType }}</option>
 											{% else %}
-											<option value="{{ r.rType }}">{{ r.rType }}</option>
+											<option value="{{ r.pk }}">{{ r.rType }}</option>
 											{% endif %}
 										{% endfor %}
 									</select>

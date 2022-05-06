@@ -82,7 +82,7 @@ def update_ranking(request):
     selection = request.POST['ranking']
 
     customer = get_object_or_404(Customer, pk=pk)
-    customer.ranking = Ranking.objects.get(rType=selection)
+    customer.ranking = Ranking.objects.get(pk=selection)
     customer.save()
 
     return HttpResponseRedirect(reverse('bank_app:index'))
