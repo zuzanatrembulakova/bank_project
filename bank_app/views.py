@@ -109,13 +109,13 @@ def show_accounts(request, pkcust):
             balance = get_balance_for_account(a)
             balances.append( (a.pk, balance) )
 
-    context = {
-            'usertype': get_user_type(request.user),
-            'customer': customer,
-            'accounts': accounts,
-            'balances': balances,
-            'loans': loans,
-    }
+        context = {
+                'usertype': get_user_type(request.user),
+                'customer': customer,
+                'accounts': accounts,
+                'balances': balances,
+                'loans': loans,
+        }
 
     return render(request, 'bank_app/accounts.html', context)
 
@@ -305,13 +305,11 @@ def request_loan(request):
     pk = request.POST['pk']
  
     loan = Loan()
+    loan.customer = Customer.objects.get(user = request.user)
+    loan.account = Account.objects.get(pk=pk)
     loan.loanAmount = request.POST['loan_amount']
     loan.remainingAmount = request.POST['loan_amount']
-    loan.account = get_object_or_404(Account, pk=pk)
-    loan.customer = Customer.objects.get(user = request.user)
     loan.save()
-
-    print(loan)
  
     return HttpResponseRedirect(reverse('bank_app:index'))
 
@@ -326,8 +324,8 @@ def accept_loan(request):
         pk = request.POST['pk']
         pkcust = request.POST['pkcust']
         amount = int(request.POST['loan_amount'])
-        to_laccount = request.POST['to_laccount']
-        dest_account = Account.objects.filter(accountNumber = to_laccount)
+        to_account = request.POST['to_account']
+        dest_account = Account.objects.filter(accountNumber = to_account)
         # print(loan)
         
         loan = Loan.objects.get(pk = pk)
@@ -352,11 +350,13 @@ def accept_loan(request):
 
 
 def decline_loan(request):
-    pkcust = request.POST['pkcust']
     pk = request.POST['pk']
+    pkcust = request.POST['pkcust']
+
     loan = Loan.objects.get(pk = pk)
     loan.confirmed = 'false'
     loan.save()
+
     return show_accounts(request, pkcust)
 
 
@@ -374,7 +374,7 @@ def pay_loan(request):
         from_balance = get_balance_for_account(from_account)
         loan = Loan.objects.get(pk = pk)
 
-        if amount > int(remaining_amount):
+        if amount > remaining_amount:
             print('The entered amount exceeds the loan')
         
         elif from_balance > amount:

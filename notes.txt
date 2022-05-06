@@ -34,3 +34,5 @@ kolko ostava > 0
 
 - ked neexistuje ucet v banke ani v druhej tak co potom
 
+-pri accept loan vo views, ma to byt int ked je input number?
+
