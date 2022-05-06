@@ -3,10 +3,12 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description" content="Bank app" />
+	<meta name="keywords" content="bank, money, transaction, payment, loan" />
 	<script src="https://kit.fontawesome.com/b08a3acf90.js" crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
 	<title>Bank</title>
 	</head>
@@ -30,19 +32,19 @@
 		<main class="main">
 			<section id="create_cust">
 				<h3>Create customer</h3>
-				<form method="POST">
+				<form method="post">
 					{% csrf_token %}
 					<div class="form_item_wrapper">
 						<label>User Name</label>
-						<input type="text" name="name" placeholder="Type new user name" required>
+						<input type="text" name="name" placeholder="Type new user name" required />
 					</div>
 					<div class="form_item_wrapper">
 						<label>Password</label>
-						<input type="password" name="password" placeholder="Type new password for the user" required>
+						<input type="password" name="password" placeholder="Type new password for the user" required />
 					</div>
 					<div class="form_item_wrapper">
 						<label>Phone</label>
-						<input type="text" name="phone" pattern="[0-9]{8}" placeholder="User's phone (8 digits)" required>
+						<input type="text" name="phone" pattern="[0-9]{8}" placeholder="User's phone (8 digits)" required />
 					</div>
 					<button formaction="{% url 'bank_app:create_customer' %}" class="btn">Create customer</button>
 				</form>
@@ -66,9 +68,9 @@
 				{% else %}	
 					<tr>
 				{% endif %}	
-						<form method="POST">
+						<form method="post">
 							{% csrf_token %}
-								<input type="hidden" name="pk" value="{{ c.pk }}">
+								<input type="hidden" name="pk" value="{{ c.pk }}" />
 								<td>{{ forloop.counter }}</td>
 								<td>{{ c.user.username }}</td>
 								<td>{{ c.phone }}</td>
@@ -101,7 +103,7 @@
 		<main class="main">
 			<section id="transfer_section">
 				<h3>Transfer between accounts</h3>
-				<form method="POST">
+				<form method="post">
 					{% csrf_token %}
 
 					<div class="form_item_wrapper">
@@ -116,7 +118,7 @@
 
 					<div class="form_item_wrapper">
 						<label>To account</label>
-						<input type="text" name="to_account" placeholder="Recipient's account number">
+						<input type="text" name="to_account" placeholder="Recipient's account number" />
 					</div>
 					<div class="form_item_wrapper">
 						<label>Amount</label>
@@ -124,16 +126,16 @@
 					</div>
 					<div class="form_item_wrapper">
 						<label>Description</label>
-						<input type="text" name="description" placeholder="Text for transaction">
+						<input type="text" name="description" placeholder="Text for transaction" />
 					</div>
 					<div id="automatic_payment_wrapper" class="form_item_wrapper">
 						<label>Set as automatic payment</label>
-						<input type="checkbox" id="aut_payment_check" name="payment_check" onclick="showAutomaticPayment()">
+						<input type="checkbox" id="aut_payment_check" name="payment_check" onclick="showAutomaticPayment()" />
 					</div>
 					<div id="automatic_payment_details">
 						<div class="form_item_wrapper">
 							<label>Repeat every</label>
-							<input type="number" name="repeat_every" value="1" min="1" max="59">
+							<input type="number" name="repeat_every" value="1" min="1" max="59" />
 							<select name="repeat_time_unit">	
 								<!-- <option disabled selected value> -- select an option -- </option>						 -->
 								<option value="minute" selected>Minute</option>
@@ -142,7 +144,7 @@
 						</div>
 						<div class="form_item_wrapper">
 							<label>How many times you wish to repeat the payment?</label>
-							<input type="number" name="repeat_number" value="1" min="1">
+							<input type="number" name="repeat_number" value="1" min="1" />
 						</div>
 					</div>
 					<button formaction="{% url 'bank_app:set_transaction' %}" class="btn">Transfer Money</button>
@@ -166,9 +168,9 @@
 						<tr>
 					{% endif %}	
 					
-						<form method="POST">
+						<form method="post">
 							{% csrf_token %}
-								<input type="hidden" name="pk" value="{{ a.pk }}">
+								<input type="hidden" name="pk" value="{{ a.pk }}" />
 								<td>{{ forloop.counter }}</td>
 								<td>{{ a.accountNumber }}</td>
 								<td>
@@ -180,7 +182,7 @@
 								</td>
 								<td>
 									{% if active_customer.ranking.loan == True %}
-										<input type="number" name="loan_amount" placeholder="Amount to loan">
+										<input type="number" name="loan_amount" placeholder="Amount to loan" />
 										<button formaction="{% url 'bank_app:request_loan' %}" class="simple_btn">
 											Request
 										</button>
@@ -215,11 +217,11 @@
                         <tr>
                     {% endif %}
                    
-                        <form method="POST">
+                        <form method="post">
                             {% csrf_token %}
-                                <input type="hidden" name="pk" value="{{ l.pk }}">
-								<input type="hidden" name="account" value="{{ l.account }}">
-								<input type="hidden" name="remaining_amount" value="{{ l.remainingAmount }}">
+                                <input type="hidden" name="pk" value="{{ l.pk }}" />
+								<input type="hidden" name="account" value="{{ l.account }}" />
+								<input type="hidden" name="remaining_amount" value="{{ l.remainingAmount }}" />
 								<!-- <input type="hidden" name="cpk" value="{{ c.pk }}"> -->
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ l.account }}</td>
@@ -231,7 +233,7 @@
 										<td>Completed</td>
 									{% else %}
 										<td>
-											<input type="number" name="loan_transfer" placeholder="Amount to transfer">
+											<input type="number" name="loan_transfer" placeholder="Amount to transfer" />
 												<button formaction="{% url 'bank_app:pay_loan' %}" class="simple_btn">
 													Pay
 												</button>

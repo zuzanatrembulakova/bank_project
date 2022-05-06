@@ -320,13 +320,11 @@ def accept_loan(request):
     # is_error = False
 
     if request.method == "POST":
-        # remaining_amount = request.POST['remaining_amount']
         pk = request.POST['pk']
         pkcust = request.POST['pkcust']
         amount = int(request.POST['loan_amount'])
         to_account = request.POST['to_account']
         dest_account = Account.objects.filter(accountNumber = to_account)
-        # print(loan)
         
         loan = Loan.objects.get(pk = pk)
 

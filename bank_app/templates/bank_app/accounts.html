@@ -3,10 +3,12 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Bank app" />
+    <meta name="keywords" content="bank, money, transaction, payment, loan" />
     <script src="https://kit.fontawesome.com/b08a3acf90.js" crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
 	<title>Accounts</title>
 	</head>
@@ -30,18 +32,18 @@
     <main class="main">
         <section>
             <h3>Add account for {{ customer.user.username }}</h3>
-            <form method="POST">
+            <form method="post">
                 {% csrf_token %}
                 <div class="form_item_wrapper">
                     <label>Account Number</label>
-                    <input type="text" name="number" placeholder="Type Account Number">
+                    <input type="text" name="number" placeholder="Type Account Number" />
                 </div>
                 <div class="form_item_wrapper">
                     <label>Initial Balance</label>
-                    <input type="number" name="balance" placeholder="Set Initial Balance">
+                    <input type="number" name="balance" placeholder="Set Initial Balance" />
                 </div>
                 
-                <input type="hidden" name="pk" value="{{ customer.pk }}">
+                <input type="hidden" name="pk" value="{{ customer.pk }}" />
                 <button formaction="{% url 'bank_app:add_account' %}" class="btn">Add account</button>
             </form>
         </section>
@@ -62,10 +64,10 @@
 					<tr>
 				{% endif %}	
                 
-                    <form method="POST">
+                    <form method="post">
                         {% csrf_token %}
-                            <input type="hidden" name="pk" value="{{ a.pk }}">
-                            <input type="hidden" name="pk_cust" value="{{ customer.pk }}">
+                            <input type="hidden" name="pk" value="{{ a.pk }}" />
+                            <input type="hidden" name="pk_cust" value="{{ customer.pk }}" />
                             <td>{{ forloop.counter }}</td>
                             <td>{{ a.accountNumber }}</td>
                             <td>
@@ -103,12 +105,12 @@
                     <tr>
                 {% endif %}
                
-                    <form method="POST">
+                    <form method="post">
                         {% csrf_token %}
-                            <input type="hidden" name="pk" value="{{ l.pk }}">
-							<input type="hidden" name="to_account" value="{{ l.account }}">
-                            <input type="hidden" name="loan_amount" value="{{ l.loanAmount }}">
-                            <input type="hidden" name="pkcust" value="{{ customer.pk }}">
+                            <input type="hidden" name="pk" value="{{ l.pk }}" />
+							<input type="hidden" name="to_account" value="{{ l.account }}" />
+                            <input type="hidden" name="loan_amount" value="{{ l.loanAmount }}" />
+                            <input type="hidden" name="pkcust" value="{{ customer.pk }}" />
                             <td>{{ forloop.counter }}</td>
                             <td>{{ l.account }}</td>
                             <td>{{ l.loanAmount }}</td>
@@ -147,31 +149,6 @@
             </table>
         </section>
     </main>
-
-        <!-- 
-            <button formaction="{% url 'bank_app:add_account' %}">Manage accounts</button>
-            <div class="accounts_modal" id="accounts_modal_{{ c.pk }}">
-            <div class="accounts_bg">
-                <div id="accounts_content">
-                    <button id="close" onclick="closeModal('{{ c.pk }}')">&times;</button>
-
-                    <div>
-                        <h3>{{ c.user.username }}'s accounts</h3>
-                    </div>
-
-                    <div>
-                        <h3>Add account</h3>
-                        <form method="POST">
-                            {% csrf_token %}
-                            <input type="text" name="number" placeholder="Account Number">
-                            <input type="number" name="balance" placeholder="Initial Balance">
-                            <input type="hidden" name="pk" value="{{ c.pk }}">
-                            <button formaction="{% url 'bank_app:add_account' %}">Add account</button>
-                        </form>
-                    </div>									
-                </div>
-            </div>
-        </div> -->
 					
     {% endif %}	
 	<script src="{% static 'script/script.js' %}"></script>

@@ -3,10 +3,12 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description" content="Bank app" />
+	<meta name="keywords" content="bank, money, transaction, payment, loan" />
 	<script src="https://kit.fontawesome.com/b08a3acf90.js" crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
 	<title>Bank</title>
 	</head>
@@ -14,25 +16,25 @@
 	<header class="login_header">
 		<h1>Bank app</h1>
 		<section class="login_section">
-			<form method='POST'>
+			<form method='post'>
 				<h2>Log in</h2>
 				{% csrf_token %}
 				{% if verified == 0 %}
 					<div class="form_item_wrapper">
 						<p>We've sent a verification code to your number</p>
 						<label>SMS code</label>
-						<input type="number" name="code" placeholder="Type your SMS code">
-						<input type="hidden" name="codepk" value="{{ code.pk }}">
+						<input type="number" name="code" placeholder="Type your SMS code" />
+						<input type="hidden" name="codepk" value="{{ code.pk }}" />
 					</div>
 					<button formaction="{% url 'login_app:login_verify' %}" class="btn">Login</button>
 				{% else %}
 					<div class="form_item_wrapper">
 						<label>User Name</label>
-						<input type="text" name="name" placeholder="Type your user name">
+						<input type="text" name="name" placeholder="Type your user name" />
 					</div>
 					<div class="form_item_wrapper">
 						<label>Password</label>
-						<input type="password" name="password" placeholder="Type your password">
+						<input type="password" name="password" placeholder="Type your password" />
 					</div>
 					<button formaction="{% url 'login_app:login' %}" class="btn">Login</button>
 				{% endif %}
