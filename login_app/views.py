@@ -1,4 +1,3 @@
-import re
 from django.shortcuts import render, reverse
 from django.contrib.auth import authenticate, login as dj_login, logout as dj_logout
 from django.http import HttpResponseRedirect

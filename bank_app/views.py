@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
 from datetime import datetime, timedelta
+from django.contrib.auth.models import User
 
 import pytz
 import requests

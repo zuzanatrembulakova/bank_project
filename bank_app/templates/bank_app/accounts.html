@@ -13,6 +13,7 @@
 	<title>Accounts</title>
 	</head>
 
+    <body>
     {% if request.user.is_authenticated %}
 
 	<header>
@@ -58,11 +59,9 @@
                 </tr>
 
                 {% for a in accounts %}
-                {% if forloop.counter|divisibleby:2 %}
-					<tr class="white_bg">
-				{% else %}	
-					<tr>
-				{% endif %}	
+                <tr {% if forloop.counter|divisibleby:2 %}
+                        class="white_bg"
+                    {% endif %}	>
                 
                     <form method="post">
                         {% csrf_token %}
@@ -99,11 +98,9 @@
                 </tr>
 
                 {% for l in loans %}
-                {% if forloop.counter|divisibleby:2 %}
-                    <tr class="white_bg">
-                {% else %}  
-                    <tr>
-                {% endif %}
+                <tr {% if forloop.counter|divisibleby:2 %}
+                        class="white_bg"
+                    {% endif %}	>
                
                     <form method="post">
                         {% csrf_token %}

@@ -12,7 +12,8 @@
 
 	<title>Bank</title>
 	</head>
-
+	
+	<body>
 	{% if request.user.is_authenticated %}
 	<header>
 		<h1>Bank app</h1>
@@ -63,11 +64,9 @@
 						<th></th>
 					</tr>
 				{% for c in customers %}
-				{% if forloop.counter|divisibleby:2 %}
-					<tr class="white_bg">
-				{% else %}	
-					<tr>
-				{% endif %}	
+				<tr {% if forloop.counter|divisibleby:2 %}
+                        class="white_bg"
+                    {% endif %}	>	
 						<form method="post">
 							{% csrf_token %}
 								<input type="hidden" name="pk" value="{{ c.pk }}" />
@@ -162,11 +161,9 @@
 					</tr>
 
 					{% for a in customer_accounts %}
-					{% if forloop.counter|divisibleby:2 %}
-						<tr class="white_bg">
-					{% else %}	
-						<tr>
-					{% endif %}	
+					<tr {% if forloop.counter|divisibleby:2 %}
+                        class="white_bg"
+                    {% endif %}	>	
 					
 						<form method="post">
 							{% csrf_token %}
@@ -211,11 +208,9 @@
                     </tr>
  
                     {% for l in loans %}
-                    {% if forloop.counter|divisibleby:2 %}
-                        <tr class="white_bg">
-                    {% else %}  
-                        <tr>
-                    {% endif %}
+                    <tr {% if forloop.counter|divisibleby:2 %}
+                        class="white_bg"
+                    {% endif %}	>
                    
                         <form method="post">
                             {% csrf_token %}
