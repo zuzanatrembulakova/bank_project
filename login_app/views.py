@@ -59,23 +59,20 @@ def login(request):
 
 def login_verify(request):
     context = {}
-    user_code = request.POST['code']
+    user_code = int(request.POST['code'])
     codepk = request.POST['codepk']
     code = LoginCode.objects.get(pk = codepk)
 
-    if user_code == code:
-        code.delete()
-        # context = {                                                                             
-        #     'login_step': login_step
-        #     }
-        return HttpResponseRedirect(reverse('bank_app:index'))
-    else:
-        verify_error = 'Wrong code' 
+    if user_code != int(code.code):
+        verify_error = 'Wrong code'
+        print('Error') 
         context = {              
             'verify_error': verify_error,
             }
-
-    return HttpResponseRedirect(reverse('bank_app:index'))
+        return logout(request)
+    else:
+        code.delete()
+        return HttpResponseRedirect(reverse('bank_app:index'))
 
 
 def logout(request):
