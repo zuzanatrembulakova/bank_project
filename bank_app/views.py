@@ -1,13 +1,15 @@
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
-from datetime import datetime, timedelta
-from django.contrib.auth.models import User
+from datetime import date, datetime, timedelta
+from django.contrib.auth.models import User 
 
 import pytz
 import requests
 from .views_common import *
 from .models import *
+
+import random
 
 
 def index(request):
@@ -36,16 +38,24 @@ def show_index(request, message = '', is_error = False):
             active_customer = Customer.objects.get(user = request.user)
             customer_accounts = Account.objects.filter(customer=active_customer) 
             loans = Loan.objects.filter(customer=active_customer)
+            cards = CreditCard.objects.filter(customer=active_customer)
 
             balances = []
             for a in customer_accounts.iterator():
                 balance = get_balance_for_account(a)
                 balances.append( (a.pk, balance) )
             
+            card_repay_balances = []
+            for c in cards.iterator():
+                card_repay_balance = get_repay_amount_for_card(c)
+                card_repay_balances.append( (c.pk, card_repay_balance) )
+            
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
             context['balances'] = balances
+            context['card_repay_balances'] = card_repay_balances
             context['loans'] = loans
+            context['cards'] = cards
 
     return render(request, 'bank_app/index.html', context)
 
@@ -104,18 +114,26 @@ def show_accounts(request, pkcust):
         customer = get_object_or_404(Customer, pk=pkcust)
         accounts = Account.objects.filter(customer=customer)
         loans = Loan.objects.filter(customer=customer)
+        cards = CreditCard.objects.filter(customer=customer)
 
         balances = []
         for a in accounts.iterator():
             balance = get_balance_for_account(a)
             balances.append( (a.pk, balance) )
+        
+        card_repay_balances = []
+        for c in cards.iterator():
+            card_repay_balance = get_repay_amount_for_card(c)
+            card_repay_balances.append( (c.pk, card_repay_balance) )
 
         context = {
                 'usertype': get_user_type(request.user),
                 'customer': customer,
                 'accounts': accounts,
                 'balances': balances,
+                'card_repay_balances': card_repay_balances,
                 'loans': loans,
+                'cards': cards,
         }
 
     return render(request, 'bank_app/accounts.html', context)
@@ -408,3 +426,201 @@ def del_loan(request):
     loan.delete()
     
     return show_accounts(request, pkcust)
+
+
+# def generate_card(request):
+#     context = {}
+#     generated = 1
+    
+#     pk = request.POST['pk']
+
+#     card_balance = request.POST['initial_card_balance']
+#     # card_number = random.randint(10000000000000000,9999999999999999)
+#     card_number = 5555124368978974
+#     # customer = Customer.objects.get(pk = pk)
+#     # card_holder = customer.user.username
+#     tz=pytz.timezone("utc")
+#     expiry_date = datetime.now(tz)
+#     cvv = random.randint(100,999)
+
+#     context = {
+#             'card_number': card_number,
+#             'card_balance': card_balance,
+#             'expiry_date': expiry_date,
+#             'cvv': cvv,
+#             'generated': generated,
+#     }
+
+#     return render(request, 'bank_app/accounts.html', context)
+
+def generate_card(request):
+
+    pkcust = request.POST['pk']
+    # fake = Faker()
+    # pk = request.POST['pk']
+
+    years = 5
+    days_per_year = 365.24
+
+    customer = get_object_or_404(Customer, pk=pkcust)
+    card_number = random.randint(1000000000000000,9999999999999999)
+    # card_number = fake.credit_card_number(card_type='amex')
+    # card_number = 5555325698564587
+    card_balance = request.POST['initial_card_balance']
+    spent_amount = -20
+    # expiry_date = datetime.today().strftime('%Y-%m-%d')
+    current_date = datetime.today()
+    print (current_date)
+    expiry_date = current_date + timedelta(days=(years*days_per_year))
+    print(expiry_date)
+    cvv = random.randint(100,999)
+
+    card = CreditCard()
+    card.customer = customer
+    card.cardNumber = card_number
+    card.initialBalance = card_balance
+    card.spentAmount = spent_amount
+    card.expiryDate = expiry_date
+    card.cvvNumber = cvv
+    card.save()
+
+    card_movement = CardMovement()
+    card_movement.card = card
+    card_movement.value = spent_amount
+    card_movement.description = "Initial balance"
+    card_movement.save()
+
+    # account_movement = AccountMovement()
+    # account_movement.account = account
+    # account_movement.value = balance
+    # account_movement.description = "Initial balance"
+    # account_movement.save()
+    
+    # customer = Customer.objects.get(pk = pk)
+    # card_holder = customer.user.username
+
+    return show_accounts(request, pkcust)
+
+def del_card(request):
+    pk = request.POST['pk']
+    pkcust = request.POST['pkcust']
+
+    card = get_object_or_404(CreditCard, pk=pk)
+    card.delete()
+    
+    return show_accounts(request, pkcust)
+
+@transaction.atomic 
+def repay_card(request):
+    message = 'Success'
+    is_error = False
+
+    if request.method == "POST":
+        pk = request.POST['pk']
+
+        from_accountpk = request.POST['from_account']
+        from_account = Account.objects.get(pk = from_accountpk)
+        print(from_account)
+
+        to_card = request.POST['card_number']
+        dest_card = CreditCard.objects.get(cardNumber = to_card)
+        print(dest_card)
+        # to_cardpk = request.POST['card_number']
+        # to_card = CreditCard.objects.get(pk = to_cardpk)
+        
+        amount = int(request.POST['card_repay'])
+        remaining_amount = int(request.POST['spent_amount'])
+
+        from_balance = get_balance_for_account(from_account)
+        card = CreditCard.objects.get(pk = pk)
+        to_balance = get_repay_amount_for_card(card)
+
+        if amount <= 0 or amount > abs(to_balance):
+            print('error')
+        
+        elif from_balance > amount:
+
+            try:
+                with transaction.atomic():
+                    movement_from = AccountMovement()
+                    movement_from.account = from_account
+                    movement_from.value = -amount
+                    movement_from.description = 'Credit card repay'
+                    movement_from.save()
+
+                    # card.spentAmount = remaining_amount + amount
+                    # card.save()
+
+                    movement_to = CardMovement()
+                    movement_to.card = dest_card
+                    movement_to.value = amount
+                    movement_to.description = 'Credit card repay'
+                    movement_to.save()
+
+            except IntegrityError:
+                message = 'Transaction  failed'
+                is_error = True
+                print('Transaction failed')
+
+        else:
+            print('Insufficient funds')
+
+    return show_index(request, message, is_error)
+
+@transaction.atomic 
+def pay_card(request):
+    message = 'Success'
+    is_error = False
+
+    if request.method == "POST":
+        pk = request.POST['pk']
+        from_cardpk = request.POST['card_number']
+        from_card = CreditCard.objects.get(cardNumber = from_cardpk)
+        balance = int(request.POST['balance'])
+        amount = int(request.POST['card_pay'])
+        card = CreditCard.objects.get(pk = pk)
+        description = request.POST['card_desc']
+ 
+        if balance > amount:
+            try:
+                with transaction.atomic():
+                    movement_from = CardMovement()
+                    movement_from.card = from_card
+                    movement_from.value = -amount
+                    movement_from.description = description
+                    movement_from.save()
+
+                    card.initialBalance = balance - amount
+                    card.save()
+
+            except IntegrityError:
+                message = 'Transaction  failed'
+                is_error = True
+                print('Transaction failed')
+
+        else:
+            print('Insufficient funds')
+
+    return show_index(request, message, is_error)
+
+
+def show_card_movements(request):
+    context = {}
+    
+    pk = request.POST['pk']
+
+    card = get_object_or_404(CreditCard, pk=pk)
+    card_repay_balance = get_repay_amount_for_card(card)
+    card_movements = CardMovement.objects.filter(card=card)
+
+    context = {
+            'usertype': get_user_type(request.user),
+            'card': card,
+            'card_repay_balance': card_repay_balance,
+            'card_movements': card_movements,
+    }
+
+    return render(request, 'bank_app/card_movements.html', context)
+
+# def confirm_card(request):
+#     return HttpResponseRedirect(reverse('bank_app:index'))

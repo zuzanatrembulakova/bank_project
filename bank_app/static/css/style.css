@@ -91,6 +91,10 @@ body {
     color: #00ad0e;
 }
 
+.red_text {
+    color: #ff5f38;
+}
+
 header{
     width: 100%;
     padding: 2rem;
@@ -143,7 +147,7 @@ header p{
     margin: 2rem 0;
 }
 
-.main > section:first-child h3, #automatic_payment h3{
+.main > section:first-child h3, #automatic_payment h3, #create_credit_card h3, #create_credit_card .btn {
     margin-left: 2rem;
 }
 
@@ -164,7 +168,7 @@ header p{
     margin-left: .5rem;
     margin-bottom: 3.5px;
 }
-#automatic_payment_details{
+#automatic_payment_details, #generated_card{
     display: none;
 }
 #automatic_payment_details .form_item_wrapper{
@@ -186,8 +190,12 @@ header p{
     margin-left: 0;
 }
 
-.main #movements_section{
+.main #movements_section, #cards_overview {
     grid-column: 1 / 3;
+}
+
+#loans_overview {
+    grid-column: 2;
 }
 
 .form_item_wrapper > label{
@@ -199,7 +207,7 @@ header p{
 
 input{
     background-color: transparent;
-    border: none;
+    border: 1px solid #eeeeee;
     background-color: #ffffff;
     padding: 10px 5px;
 }

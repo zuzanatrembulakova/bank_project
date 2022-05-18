@@ -1,6 +1,6 @@
 # views common functions
 
-from .models import Customer, Account, AccountMovement
+from .models import CreditCard, Customer, Account, AccountMovement, CardMovement
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
@@ -15,5 +15,9 @@ def get_user_type(u:User) -> str:
 
 def get_balance_for_account(acc:Account) -> int:
     result = AccountMovement.objects.filter(account = acc).aggregate(Sum('value'))
+    return result['value__sum']
+
+def get_repay_amount_for_card(acc:CreditCard) -> int:
+    result = CardMovement.objects.filter(card = acc).aggregate(Sum('value'))
     return result['value__sum']
 

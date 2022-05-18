@@ -43,7 +43,6 @@
                     <label>Initial Balance</label>
                     <input type="number" name="balance" placeholder="Set Initial Balance" />
                 </div>
-                
                 <input type="hidden" name="pk" value="{{ customer.pk }}" />
                 <button formaction="{% url 'bank_app:add_account' %}" class="btn">Add account</button>
             </form>
@@ -86,6 +85,90 @@
                 {% endfor %}
             </table>
         </section>
+
+        <section id="create_credit_card">
+            <h3>Add credit card for {{ customer.user.username }}</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form_item_wrapper">
+                    <label>Initial Balance</label>
+                    <input type="number" name="initial_card_balance" placeholder="Set Initial Credit Card Balance" />
+                </div>
+                <input type="hidden" name="pk" value="{{ customer.pk }}" />
+                <button formaction="{% url 'bank_app:generate_card' %}" class="btn" id="generate_card_btn">Generate card</button>
+            </form>
+            <!-- {% if generated == 1 %}
+                <form id="generated_card" method="post">
+                    {% csrf_token %}
+                    <div class="form_item_wrapper">
+                        <label>Card number</label>
+                        <input type="number" name="card_no" max='16'/>
+                    </div>
+                    <div class="form_item_wrapper">
+                        <label>Card balance</label>
+                        <input type="number" name="card_balance" />
+                    </div>
+                    <div class="form_item_wrapper">
+                        <label>Card holder</label>
+                        <input type="number" name="card_holder" value="{{ customer.user.username }}"/>
+                    </div>
+                    <div class="form_item_wrapper">
+                        <label>Epiry date</label>
+                        <input type="datetime" name="card_expiry" />
+                    </div>
+                    <div class="form_item_wrapper">
+                        <label>CVV</label>
+                        <input type="number" name="card_cvv" max='3'/>
+                    </div>
+                    <button formaction="{% url 'bank_app:confirm_card' %}" class="btn">Confirm</button>
+                </form>
+            {% endif %} -->
+        </section>
+
+        <section>
+            <h3>Manage credit cards for {{ customer.user.username }}</h3>
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Card Number</th>
+                    <th>Balance</th>
+                    <th>Expiry Date</th>
+                    <th>Debt</th>
+                    <!-- <th>CVV</th> -->
+                </tr>
+
+                {% for c in cards %}
+                <tr {% if forloop.counter|divisibleby:2 %}
+                        class="white_bg"
+                    {% endif %}	>
+                
+                    <form method="post">
+                        {% csrf_token %}
+                            <input type="hidden" name="pk" value="{{ c.pk }}" />
+                            <input type="hidden" name="pkcust" value="{{ customer.pk }}" />
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ c.cardNumber }}</td>
+                            <td>{{ c.initialBalance }}</td>
+                            <td>{{ c.expiryDate }}</td>
+                            <td>
+                                {% for b in card_repay_balances %}
+                                    {% if b.0 == c.pk %}
+                                        {{ b.1 }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <!-- <td>{{ c.cvvNumber }}</td> -->
+                            <td>
+                                <button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </table>
+        </section>
+
         <section id="loans_overview">
             <h3>Manage loans for {{ customer.user.username }}</h3>
             <table>

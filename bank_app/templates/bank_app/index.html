@@ -228,10 +228,14 @@
 										<td>Completed</td>
 									{% else %}
 										<td>
-											<input type="number" name="loan_transfer" placeholder="Amount to transfer" />
-												<button formaction="{% url 'bank_app:pay_loan' %}" class="simple_btn">
+											<div class="form_item_wrapper">
+												<input type="number" name="loan_transfer" placeholder="Amount to transfer" />
+											</div>
+											<div class="form_item_wrapper">
+												<button formaction="{% url 'bank_app:pay_loan' %}" class="btn">
 													Pay
 												</button>
+											</div>
 										</td>
 									{% endif %}
 								{% elif l.confirmed == 'false'%}
@@ -240,6 +244,91 @@
 									<td>Confirmation pending</td>
 								{% endif %}
                         </form>
+					</tr>
+					{% endfor %}
+				</table>
+			</section>
+
+			<section id="cards_overview">
+				<h3>{{ request.user.username }}'s credit cards overview</h3>
+				<table>
+					<tr>
+						<th></th>
+						<th>Card Number</th>
+						<th>Balance</th>
+						<th>Expiry Date</th>
+						<th>Debt</th>
+						<th>Repay</th>
+						<th>Pay</th>
+						<!-- <th>CVV</th> -->
+					</tr>
+	
+					{% for c in cards %}
+					<tr {% if forloop.counter|divisibleby:2 %}
+							class="white_bg"
+						{% endif %}	>
+					
+						<form method="post">
+							{% csrf_token %}
+								<input type="hidden" name="pk" value="{{ c.pk }}" />
+								<input type="hidden" name="card_number" value="{{ c.cardNumber }}" />
+								<input type="hidden" name="spent_amount" value="{{ c.spentAmount }}" />
+								<input type="hidden" name="balance" value="{{ c.initialBalance }}" />
+								<!-- <input type="hidden" name="pk_cust" value="{{ customer.pk }}" /> -->
+								<td>{{ forloop.counter }}</td>
+								<td>{{ c.cardNumber }}</td>
+								<td>{{ c.initialBalance }}</td>
+								<td>{{ c.expiryDate }}</td>
+								<td>
+									{% for b in card_repay_balances %}
+										{% if b.0 == c.pk %}
+											{{ b.1 }}
+										{% endif %}
+									{% endfor %}
+								</td>
+								<td>
+									<div class="form_item_wrapper">
+										<label>From account</label>
+										<select name="from_account">
+											<option disabled selected value> -- select an option -- </option>
+											{% for a in customer_accounts %}									
+												<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+											{% endfor %}
+										</select>
+									</div>
+									<div class="form_item_wrapper">
+										<input type="number" name="card_repay" placeholder="Amount to repay" />
+									</div>
+									<div class="form_item_wrapper">
+										<button formaction="{% url 'bank_app:repay_card' %}" class="btn">
+											Repay
+										</button>
+									</div>
+								</td>
+								<td>
+									<div class="form_item_wrapper">
+										<input type="number" name="card_pay" placeholder="Amount to pay" />
+									</div>
+									<div class="form_item_wrapper">
+										<input type="text" name="card_desc" placeholder="Text for payment" />
+									</div>
+									<div class="form_item_wrapper">
+										<button formaction="{% url 'bank_app:pay_card' %}" class="btn">
+											Pay
+										</button>
+									</div>
+								</td>
+								<td>
+									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Show credit card movements</button>
+								</td>
+
+								<!-- <td>{{ c.cvvNumber }}</td> -->
+								<!-- <td>
+									<button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">
+										<i class="fa-solid fa-trash"></i>
+									</button>
+								</td> -->
+						</form>
 					</tr>
 					{% endfor %}
 				</table>

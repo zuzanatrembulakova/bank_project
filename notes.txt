@@ -34,5 +34,10 @@ kolko ostava > 0
 
 - ked neexistuje ucet v banke ani v druhej tak co potom
 
--index riadok 228??
+- index riadok 228??
+
+- input field kde customer zada casovy limit (ako automatic transaction) a druhy input na sumu
+
+- transakcia medzi uctom a kartou (dropdown z ktoreho uctu a sumu kolko tam chce poslat), 
+transakcia na platbu kartou, show card movements, trash can
 

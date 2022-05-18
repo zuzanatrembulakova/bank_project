@@ -31,7 +31,7 @@
 
 		<main class="main">
 			<section id="movements_section">
-                <h3>Detail view for account: {{ account.accountNumber }}</h3>
+                <h3>Detail view for credit card: {{ card.cardNumber }}</h3>
                 <table>
 					<tr>
 						<th></th>
@@ -39,18 +39,18 @@
 						<th>Amount</th>
 						<th>Description</th>
 					</tr>
-                   {% for am in account_movements %}
+                   {% for cm in card_movements %}
 				   		<tr>
                             <th>{{ forloop.counter }}</th>
-                            <th>{{ am.timestamp }}</th>
-                            {% if am.value > 0 %}
-                                <th class="green_text">+{{ am.value }}</th>
-							{% elif am.value == 0 %}
-								<th>{{ am.value }}</th>
+                            <th>{{ cm.timestamp }}</th>
+                            {% if cm.value > 0 %}
+                                <th class="green_text">+{{ cm.value }}</th>
+							{% elif cm.value == 0 %}
+								<th>{{ cm.value }}</th>
                             {% else %}
-								<th class="red_text">{{ am.value }}</th>
+								<th class="red_text">{{ cm.value }}</th>
                             {% endif %}
-                            <th>{{ am.description }}</th>
+                            <th>{{ cm.description }}</th>
 						</tr>
                     {% endfor %}
                     

@@ -25,4 +25,11 @@ urlpatterns = [
         path('accept_loan/', views.accept_loan, name='accept_loan'),
         path('pay_loan/', views.pay_loan, name='pay_loan'),
         path('del_loan/', views.del_loan, name='del_loan'),
+
+        path('generate_card/', views.generate_card, name='generate_card'),
+        path('del_card/', views.del_card, name='del_card'),
+        path('repay_card/', views.repay_card, name='repay_card'),
+        path('pay_card/', views.pay_card, name='pay_card'),
+        path('show_card_movements/', views.show_card_movements, name='show_card_movements'),
+        # path('confirm_card/', views.confirm_card, name='confirm_card'),
 ]

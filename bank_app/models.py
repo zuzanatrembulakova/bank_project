@@ -62,3 +62,23 @@ class AutomaticPayment(models.Model):
 
     def __str__(self):
         return f"{self.account} - {self.to_account} - {self.value} - {self.repeat_number} - {self.timestamp}"
+
+class CreditCard(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    cardNumber = models.IntegerField()
+    initialBalance = models.IntegerField()
+    spentAmount = models.IntegerField()
+    expiryDate = models.DateTimeField(default=now, editable=False)
+    cvvNumber = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.cardNumber} - {self.initialBalance} - {self.spentAmount} - {self.expiryDate} - {self.cvvNumber}"
+
+class CardMovement(models.Model):
+    card = models.ForeignKey(CreditCard, on_delete=models.CASCADE)
+    value = models.IntegerField()
+    timestamp = models.DateTimeField(default=now, editable=False)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"{self.value} - {self.timestamp} - {self.description}"
