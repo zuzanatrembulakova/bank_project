@@ -1,0 +1,87 @@
+@startuml
+
+entity Ranking{
+    * PK ID
+    --
+    * Type
+    * Loan
+}
+
+entity Customer {
+  * PK ID
+  --
+  * FK RankingID
+  * Name
+  * TelephoneNUmber
+  * Password
+}
+
+entity Account {
+    * PK ID
+    --
+    * FK CustomerID
+    * AccountNumber
+}
+
+entity AccountMovement {
+    * PK ID
+    --
+    * FK AccountID
+    * Value
+    * Timestamp
+    * Description
+}
+
+entity Bank {
+		* PK ID
+		--
+		* BankCode
+		* Path
+}
+
+entity Loan{
+    * PK ID
+    --
+    * FK CustomerID
+    * FK BankAccountID
+    * LoanAmount
+    * RemainingAmount
+    * Confirmed
+}
+
+entity AutomaticPayment{
+    * PK ID
+    --
+    * FK BankAccountID
+    * ToAccount
+    * Amount
+    * Description
+    * RepeatEvery
+    * RepeatNumber
+    * Timestamp
+}
+
+entity CreditCard {
+		* PK ID
+		--
+		* FK CustomerID
+		* CardNumber
+		* ExpiryDate
+		* CVVNumber
+		* Amount
+}
+
+entity BankEmployee{
+    * PK ID
+    --
+    * Username
+    * Password
+}
+
+Customer |o--{ Account
+Ranking ||--|| Customer
+Account ||--{ AccountMovement
+Customer ||--{ Loan
+Account ||--{ AutomaticPay
+Customer ||--{ CreditCard
+@enduml
