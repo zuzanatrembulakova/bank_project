@@ -41,3 +41,11 @@ kolko ostava > 0
 - transakcia medzi uctom a kartou (dropdown z ktoreho uctu a sumu kolko tam chce poslat), 
 transakcia na platbu kartou, show card movements, trash can
 
+-pridat do tranzakcii ze amount sa nesmie rovnat alebo byt mensi ako 0 - pridat aj do front-end validacie
+-zduplikovat banku
+
+QUESTIONS:
+
+1. REST transaction
+2. GitLab pages
+3. Bank original features

@@ -428,31 +428,6 @@ def del_loan(request):
     return show_accounts(request, pkcust)
 
 
-# def generate_card(request):
-#     context = {}
-#     generated = 1
-    
-#     pk = request.POST['pk']
-
-#     card_balance = request.POST['initial_card_balance']
-#     # card_number = random.randint(10000000000000000,9999999999999999)
-#     card_number = 5555124368978974
-#     # customer = Customer.objects.get(pk = pk)
-#     # card_holder = customer.user.username
-#     tz=pytz.timezone("utc")
-#     expiry_date = datetime.now(tz)
-#     cvv = random.randint(100,999)
-
-#     context = {
-#             'card_number': card_number,
-#             'card_balance': card_balance,
-#             'expiry_date': expiry_date,
-#             'cvv': cvv,
-#             'generated': generated,
-#     }
-
-#     return render(request, 'bank_app/accounts.html', context)
-
 def generate_card(request):
 
     pkcust = request.POST['pk']
@@ -471,20 +446,25 @@ def generate_card(request):
     print(expiry_date)
     cvv = random.randint(100,999)
 
-    card = CreditCard()
-    card.customer = customer
-    card.cardNumber = card_number
-    card.initialBalance = card_balance
-    card.spentAmount = spent_amount
-    card.expiryDate = expiry_date
-    card.cvvNumber = cvv
-    card.save()
+    try:
+        CreditCard.objects.get(cardNumber = card_number)
+        print('Credit card number already exists')
 
-    card_movement = CardMovement()
-    card_movement.card = card
-    card_movement.value = spent_amount
-    card_movement.description = "Initial debt"
-    card_movement.save()
+    except:
+        card = CreditCard()
+        card.customer = customer
+        card.cardNumber = card_number
+        card.initialBalance = card_balance
+        card.spentAmount = spent_amount
+        card.expiryDate = expiry_date
+        card.cvvNumber = cvv
+        card.save()
+
+        card_movement = CardMovement()
+        card_movement.card = card
+        card_movement.value = spent_amount
+        card_movement.description = "Initial debt"
+        card_movement.save()
 
     return show_accounts(request, pkcust)
 
@@ -512,15 +492,13 @@ def repay_card(request):
         to_card = request.POST['card_number']
         dest_card = CreditCard.objects.get(cardNumber = to_card)
         print(dest_card)
-        # to_cardpk = request.POST['card_number']
-        # to_card = CreditCard.objects.get(pk = to_cardpk)
         
         amount = int(request.POST['card_repay'])
         remaining_amount = int(request.POST['spent_amount'])
         balance = int(request.POST['balance'])
         from_balance = get_balance_for_account(from_account)
-        card = CreditCard.objects.get(pk = pk)
-        to_balance = get_repay_amount_for_card(card)
+        # card = CreditCard.objects.get(pk = pk)
+        to_balance = get_repay_amount_for_card(dest_card)
 
         if amount <= 0 or amount > abs(to_balance):
             print('The amount you entered is not valid or exceeds the debt')
@@ -535,18 +513,15 @@ def repay_card(request):
                     movement_from.description = 'Credit card repay'
                     movement_from.save()
 
-                    # card.spentAmount = remaining_amount + amount
-                    # card.save()
-
                     movement_to = CardMovement()
                     movement_to.card = dest_card
                     movement_to.value = amount
                     movement_to.description = 'Credit card repay'
                     movement_to.save()
 
-                    card.initialBalance = balance + amount
-                    card.spentAmount = remaining_amount + amount
-                    card.save()
+                    dest_card.initialBalance = balance + amount
+                    dest_card.spentAmount = remaining_amount + amount
+                    dest_card.save()
 
             except IntegrityError:
                 message = 'Transaction  failed'
@@ -571,7 +546,7 @@ def pay_card(request):
         to_account = Account.objects.get(pk = to_accountpk)
         balance = int(request.POST['balance'])
         amount = int(request.POST['card_pay'])
-        card = CreditCard.objects.get(pk = pk)
+        # card = CreditCard.objects.get(pk = pk)
         description = request.POST['card_desc']
         remaining_amount = int(request.POST['spent_amount'])
  
@@ -590,9 +565,9 @@ def pay_card(request):
                     movement_from.description = description
                     movement_from.save()
 
-                    card.initialBalance = balance - amount
-                    card.spentAmount = remaining_amount - amount
-                    card.save()
+                    from_card.initialBalance = balance - amount
+                    from_card.spentAmount = remaining_amount - amount
+                    from_card.save()
 
             except IntegrityError:
                 message = 'Transaction  failed'
@@ -604,6 +579,26 @@ def pay_card(request):
 
     return show_index(request, message, is_error)
 
+def card_interest(request):
+
+    to_card = request.POST['card_number']
+    dest_card = CreditCard.objects.get(cardNumber = to_card)
+    print(dest_card)
+    
+    debt = get_repay_amount_for_card(dest_card)
+    
+    if debt != 0:
+        amount = (abs(debt)*15)/100
+        
+        movement_to = CardMovement()
+        movement_to.card = dest_card
+        movement_to.value = -amount
+        movement_to.description = 'Interest'
+        movement_to.save()   
+    else:
+        print("Debt was repayed in time")
+ 
+    return HttpResponseRedirect(reverse('bank_app:index'))
 
 def show_card_movements(request):
     context = {}
@@ -622,6 +617,3 @@ def show_card_movements(request):
     }
 
     return render(request, 'bank_app/card_movements.html', context)
-
-# def confirm_card(request):
-#     return HttpResponseRedirect(reverse('bank_app:index'))

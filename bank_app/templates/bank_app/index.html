@@ -260,6 +260,7 @@
 						<th>Debt</th>
 						<th>Pay</th>
 						<th>Repay</th>
+						<th>Interest</th>
 						<th></th>
 						<!-- <th>CVV</th> -->
 					</tr>
@@ -333,15 +334,12 @@
 									<td></td>
 								{% endif %}
 								<td>
+									<button formaction="{% url 'bank_app:card_interest' %}" class="btn">Add interest</button>
+								</td>
+								<td>
 									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Show credit card movements</button>
 								</td>
-
 								<!-- <td>{{ c.cvvNumber }}</td> -->
-								<!-- <td>
-									<button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">
-										<i class="fa-solid fa-trash"></i>
-									</button>
-								</td> -->
 						</form>
 					</tr>
 					{% endfor %}
