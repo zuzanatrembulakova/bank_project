@@ -65,11 +65,13 @@ class AutomaticPayment(models.Model):
 
 class CreditCard(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     cardNumber = models.IntegerField()
     initialBalance = models.IntegerField()
     spentAmount = models.IntegerField()
     expiryDate = models.DateTimeField(default=now, editable=False)
     cvvNumber = models.IntegerField()
+    interest = models.IntegerField()
 
     def __str__(self):
         return f"{self.cardNumber} - {self.initialBalance} - {self.spentAmount} - {self.expiryDate} - {self.cvvNumber}"

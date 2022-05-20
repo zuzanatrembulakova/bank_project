@@ -431,11 +431,13 @@ def del_loan(request):
 def generate_card(request):
  
     pkcust = request.POST['pk']
+    accountpk = request.POST['card_account']
  
     years = 5
     days_per_year = 365.24
  
     customer = get_object_or_404(Customer, pk=pkcust)
+    account = get_object_or_404(Account, pk=accountpk)
     card_number = random.randint(1000000000000000,9999999999999999)
     card_balance = request.POST['initial_card_balance']
     spent_amount = 0
@@ -445,6 +447,7 @@ def generate_card(request):
     expiry_date = current_date + timedelta(days=(years*days_per_year))
     print(expiry_date)
     cvv = random.randint(100,999)
+    interest = 0
  
     try:
         CreditCard.objects.get(cardNumber = card_number)
@@ -453,11 +456,13 @@ def generate_card(request):
     except:
         card = CreditCard()
         card.customer = customer
+        card.account = account
         card.cardNumber = card_number
         card.initialBalance = card_balance
         card.spentAmount = spent_amount
         card.expiryDate = expiry_date
         card.cvvNumber = cvv
+        card.interest = interest
         card.save()
  
         card_movement = CardMovement()

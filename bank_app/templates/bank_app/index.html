@@ -254,15 +254,14 @@
 				<table>
 					<tr>
 						<th></th>
+						<th>Account</th>
 						<th>Card Number</th>
 						<th>Balance</th>
 						<th>Expiry Date</th>
 						<th>Debt</th>
 						<th>Pay</th>
 						<th>Repay</th>
-						<th>Interest</th>
 						<th></th>
-						<!-- <th>CVV</th> -->
 					</tr>
 	
 					{% for c in cards %}
@@ -276,8 +275,8 @@
 								<input type="hidden" name="card_number" value="{{ c.cardNumber }}" />
 								<input type="hidden" name="spent_amount" value="{{ c.spentAmount }}" />
 								<input type="hidden" name="balance" value="{{ c.initialBalance }}" />
-								<!-- <input type="hidden" name="pk_cust" value="{{ customer.pk }}" /> -->
 								<td>{{ forloop.counter }}</td>
+								<td>{{ c.account }}</td>
 								<td>{{ c.cardNumber }}</td>
 								<td>{{ c.initialBalance }}</td>
 								<td>{{ c.expiryDate }}</td>
@@ -334,18 +333,8 @@
 									<td></td>
 								{% endif %}
 								<td>
-									<button formaction="{% url 'bank_app:add_interest' %}" class="btn">Add interest</button>
-								</td>
-								<td>
 									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Show credit card movements</button>
 								</td>
-
-								<!-- <td>{{ c.cvvNumber }}</td> -->
-								<!-- <td>
-									<button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">
-										<i class="fa-solid fa-trash"></i>
-									</button>
-								</td> -->
 						</form>
 					</tr>
 					{% endfor %}
