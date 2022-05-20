@@ -15,7 +15,6 @@ urlpatterns = [
         path('del_account/', views.del_account, name='del_account'),
 
         path('show_movements/', views.show_movements, name='show_movements'),
-        # path('transfer_money/', views.transfer_money, name='transfer_money'),
         path('set_transaction/', views.set_transaction, name='set_transaction'),
 
         path('api/external_transaction/', views_api.ExternalTransaction.as_view()),
@@ -32,5 +31,4 @@ urlpatterns = [
         path('pay_card/', views.pay_card, name='pay_card'),
         path('add_interest/', views.add_interest, name='add_interest'),
         path('show_card_movements/', views.show_card_movements, name='show_card_movements'),
-        # path('confirm_card/', views.confirm_card, name='confirm_card'),
 ]
