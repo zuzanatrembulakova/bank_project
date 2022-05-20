@@ -258,8 +258,10 @@
 						<th>Balance</th>
 						<th>Expiry Date</th>
 						<th>Debt</th>
-						<th>Repay</th>
 						<th>Pay</th>
+						<th>Repay</th>
+						<th>Interest</th>
+						<th></th>
 						<!-- <th>CVV</th> -->
 					</tr>
 	
@@ -288,24 +290,14 @@
 								</td>
 								<td>
 									<div class="form_item_wrapper">
-										<label>From account</label>
-										<select name="from_account">
+										<label>To account</label>
+										<select name="to_account">
 											<option disabled selected value> -- select an option -- </option>
 											{% for a in customer_accounts %}									
 												<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
 											{% endfor %}
 										</select>
 									</div>
-									<div class="form_item_wrapper">
-										<input type="number" name="card_repay" placeholder="Amount to repay" />
-									</div>
-									<div class="form_item_wrapper">
-										<button formaction="{% url 'bank_app:repay_card' %}" class="btn">
-											Repay
-										</button>
-									</div>
-								</td>
-								<td>
 									<div class="form_item_wrapper">
 										<input type="number" name="card_pay" placeholder="Amount to pay" />
 									</div>
@@ -317,6 +309,32 @@
 											Pay
 										</button>
 									</div>
+								</td>
+								{% if c.spentAmount != 0 %}
+									<td>
+										<div class="form_item_wrapper">
+											<label>From account</label>
+											<select name="from_account">
+												<option disabled selected value> -- select an option -- </option>
+												{% for a in customer_accounts %}									
+													<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="form_item_wrapper">
+											<input type="number" name="card_repay" placeholder="Amount to repay" />
+										</div>
+										<div class="form_item_wrapper">
+											<button formaction="{% url 'bank_app:repay_card' %}" class="btn">
+												Repay
+											</button>
+										</div>
+									</td>
+								{% else %}
+									<td></td>
+								{% endif %}
+								<td>
+									<button formaction="{% url 'bank_app:add_interest' %}" class="btn">Add interest</button>
 								</td>
 								<td>
 									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Show credit card movements</button>
