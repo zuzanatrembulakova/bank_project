@@ -498,7 +498,6 @@ def repay_card(request):
         remaining_amount = int(request.POST['spent_amount'])
         balance = int(request.POST['balance'])
         from_balance = get_balance_for_account(from_account)
-        # card = CreditCard.objects.get(pk = pk)
         to_balance = get_repay_amount_for_card(dest_card)
  
         if amount <= 0 or amount > abs(to_balance):
