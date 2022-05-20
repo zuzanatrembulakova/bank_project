@@ -269,7 +269,7 @@ def transfer_money(from_account, amount, description, to_account):
         bank_code = to_account[0:4]
  
         bank = Bank.objects.get(bankCode = bank_code)
-        url = 'http://' + bank.path + '/bank/api/external_transaction/'
+        url = 'http://' + bank.path + '/bank_app/api/external_transaction/'
         print(url)
  
         data = {
