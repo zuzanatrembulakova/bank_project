@@ -586,26 +586,67 @@ def pay_card(request):
     return show_index(request, message, is_error)
  
  
+@transaction.atomic
 def add_interest(request):
+    # message = 'Success'
+    # is_error = False
+
+    if request.method == "POST":
+        pkcust = request.POST['pkcust']
+        to_account = request.POST['to_account']
+        dest_account = Account.objects.get(accountNumber = to_account)
+        print(dest_account)
+    
+        cardpk = request.POST['card_number']
+        card = CreditCard.objects.get(cardNumber = cardpk)
+
+        debt = get_repay_amount_for_card(card)
+    
+        if debt != 0:
+            try:
+                with transaction.atomic():
+                    interest = (abs(debt)*15)/100
+
+                    movement_to = AccountMovement()
+                    movement_to.account = dest_account
+                    movement_to.value = -interest
+                    movement_to.description = 'Credit card interest'
+                    movement_to.save()
  
-    to_card = request.POST['card_number']
-    dest_card = CreditCard.objects.get(cardNumber = to_card)
-    print(dest_card)
+                    card.interest = +interest
+                    card.save()
+ 
+            except IntegrityError:
+                message = 'Transaction  failed'
+                is_error = True
+                print('Transaction failed')
+ 
+        else:
+            print('Debt was repayed in time')
+ 
+    return show_accounts(request, pkcust)
+            
+
+# def add_interest(request):
+ 
+#     to_card = request.POST['card_number']
+#     dest_card = CreditCard.objects.get(cardNumber = to_card)
+#     print(dest_card)
    
-    debt = get_repay_amount_for_card(dest_card)
+#     debt = get_repay_amount_for_card(dest_card)
    
-    if debt != 0:
-        amount = (abs(debt)*15)/100
+#     if debt != 0:
+#         amount = (abs(debt)*15)/100
  
-        movement_to = CardMovement()
-        movement_to.card = dest_card
-        movement_to.value = -amount
-        movement_to.description = 'Interest'
-        movement_to.save()  
-    else:
-        print("Debt was repayed in time")
+#         movement_to = CardMovement()
+#         movement_to.card = dest_card
+#         movement_to.value = -amount
+#         movement_to.description = 'Interest'
+#         movement_to.save()  
+#     else:
+#         print("Debt was repayed in time")
  
-    return HttpResponseRedirect(reverse('bank_app:index'))
+#     return HttpResponseRedirect(reverse('bank_app:index'))
  
  
 def show_card_movements(request):

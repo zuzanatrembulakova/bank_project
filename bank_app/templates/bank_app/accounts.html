@@ -132,6 +132,8 @@
                     <form method="post">
                         {% csrf_token %}
                             <input type="hidden" name="pk" value="{{ c.pk }}" />
+                            <input type="hidden" name="to_account" value="{{ c.account }}" />
+                            <input type="hidden" name="card_number" value="{{ c.cardNumber }}" />
                             <input type="hidden" name="pkcust" value="{{ customer.pk }}" />
                             <td>{{ forloop.counter }}</td>
                             <td>{{ c.account }}</td>
