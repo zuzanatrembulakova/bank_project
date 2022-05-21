@@ -1,7 +1,10 @@
-__pycache__/
+**/__pycache__/
 *.py[cod]
 
 *.sqlite3
 .vscode/
 
 *migrations/
+
+py-venv/
+*.swp
