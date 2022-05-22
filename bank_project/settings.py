@@ -33,6 +33,10 @@ STATICFILES_DIR = [
 
 # Application definition
 
+CRONJOBS = [
+        ('*/1 * * * *', 'bank_app.views.do_automatic_payment')
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bank_app',
     'login_app',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [

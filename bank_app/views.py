@@ -229,10 +229,9 @@ def set_transaction(request):
             print('****', transaction_result)
            
     return show_index(request, message)
- 
+
  
 def do_automatic_payment():
-    print('Spustam cron')
  
     aut_payments = AutomaticPayment.objects.filter(repeat_number__gt = 0)
  
@@ -243,11 +242,10 @@ def do_automatic_payment():
  
         if time < datetime.now(tz):
            
-            transfer_money(ap.account, ap.value, ap.description, ap.to_account)
- 
-            ap.timestamp = datetime.now(tz)
-            ap.repeat_number = ap.repeat_number - 1
-            ap.save()
+            if transfer_money(ap.account, ap.value, ap.description, ap.to_account) == None:
+                ap.timestamp = datetime.now(tz)
+                ap.repeat_number = ap.repeat_number - 1
+                ap.save()
    
     return
  
