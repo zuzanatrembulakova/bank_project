@@ -1,4 +1,3 @@
-import re
 from django.shortcuts import render, reverse
 from django.contrib.auth import authenticate, login as dj_login, logout as dj_logout
 from django.http import HttpResponseRedirect
@@ -30,15 +29,15 @@ def login(request):
                 code.save()
                 print(code)
 
-                # client = Client('AC19cbcef853566442dffb9784e745034d','147803e3c78223a9280f4d5b6953c1f1')
-                # message = client.messages.create(
-                #     body=f'Here is your code: {code}',
-                #     from_='+19707167454',
-                #     to='+4571803342'
-                #     to=user.phone
-                # )
+                client = Client('AC19cbcef853566442dffb9784e745034d','147803e3c78223a9280f4d5b6953c1f1')
+                message = client.messages.create(
+                    body=f'Here is your code: {code}',
+                    from_='+19707167454',
+                    to='+4571803342',
+                    to=user.phone
+                )
 
-                # print(message.body) 
+                print(message.body) 
 
                 context = {                                                                             
                     'verified': verified,
