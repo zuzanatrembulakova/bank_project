@@ -17,7 +17,7 @@ def get_balance_for_account(acc:Account) -> int:
     result = AccountMovement.objects.filter(account = acc).aggregate(Sum('value'))
     return result['value__sum']
 
-def get_repay_amount_for_card(acc:CreditCard) -> int:
-    result = CardMovement.objects.filter(card = acc).aggregate(Sum('value'))
+def get_repay_amount_for_card(card:CreditCard) -> int:
+    result = CardMovement.objects.filter(card = card).aggregate(Sum('value'))
     return result['value__sum']
 

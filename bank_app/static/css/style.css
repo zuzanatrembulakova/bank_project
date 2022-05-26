@@ -59,7 +59,6 @@ body {
     color: #f5f5f5;
 }
 
-
 .icon_btn{
     cursor: pointer;
     background: none;
@@ -153,7 +152,12 @@ header p{
     margin: 2rem 0;
 }
 
-.main > section:first-child h3, #automatic_payment h3, #create_credit_card h3, #create_credit_card .btn {
+.main > section:first-child h3, 
+#automatic_payment h3, 
+#create_credit_card h3, 
+#create_credit_card .btn,
+#card_payments h3,
+#card_payments .btn {
     margin-left: 2rem;
 }
 
@@ -196,7 +200,7 @@ header p{
     margin-left: 0;
 }
 
-.main #movements_section, #cards_overview {
+.main #movements_section {
     grid-column: 1 / 3;
 }
 

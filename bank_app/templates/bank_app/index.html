@@ -183,10 +183,34 @@
 								</td>
 								<td>
 									{% if active_customer.ranking.loan == True %}
-										<input type="number" name="loan_amount" placeholder="Amount to loan" step=".01" />
-										<button formaction="{% url 'bank_app:request_loan' %}" class="simple_btn">
-											Request
-										</button>
+										{% if a.isLoan == False %}
+											<input type="number" name="loan_amount" placeholder="Amount to loan" step=".01" />
+											<button formaction="{% url 'bank_app:request_loan' %}" class="simple_btn">
+												Request
+											</button>
+										{% else %}
+											{% for l in loans %}
+												{% if l.loanAccount == a.accountNumber %}
+												<p>Loan status:
+													{% if l.confirmed == 'true' %}
+														{% for b in balances %}
+															{% if b.0 == a.pk %}
+																{% if b.1 == '0.00' %}
+																	Completed
+																{% else %}
+																	Active
+																{% endif %}
+															{% endif %}
+														{% endfor %}															
+													{% elif l.confirmed == 'false' %}
+														Declined
+													{% else %}
+														Pending
+													{% endif %}
+												</p>
+												{% endif %}
+											{% endfor %}
+										{% endif %}
 									{% else %}
 										<p>Not available</p>
 									{% endif %}
@@ -200,45 +224,46 @@
 				</table>
 			</section>
 
-			<section id="loans_overview">
-                <h3>{{ request.user.username }}'s loans overview</h3>
-                <table>
-                    <tr>
-                        <th></th>
-						<th>Loan Account</th>
-                        <th>Bank Account</th>
-                        <th>Loan Amount</th>
-                        <!-- <th>Amount to Pay</th> -->
-                        <th>Make a Payment</th>
-                    </tr>
- 
-                    {% for l in loans %}
-                    <tr {% if forloop.counter|divisibleby:2 %}
-                        class="white_bg"
-                    {% endif %}	>
-                   
-                        <form method="post">
-                            {% csrf_token %}
-                                <input type="hidden" name="pk" value="{{ l.pk }}" />
-								<input type="hidden" name="account" value="{{ l.account }}" />
-								<!-- <input type="hidden" name="remaining_amount" value="{{ l.remainingAmount }}" /> -->
-								<!-- <input type="hidden" name="cpk" value="{{ c.pk }}"> -->
-                                <td>{{ forloop.counter }}</td>
-								<td>{{ l.loanAccount }}</td>
-                                <td>{{ l.account }}</td>
-                                <td>{{ l.loanAmount }} DKK</td>
-                                <!-- <td>{{ l.remainingAmount }}</td> -->
-								{% if l.confirmed == 'true' %}
-									<td>Loan accepted</td>
-								{% elif l.confirmed == 'false'%}
-									<td>Loan declined</td>
-								{% else %}
-									<td>Confirmation pending</td>
+			<section id="card_payments">
+
+				<h3>Make card payment</h3>
+				<form method="post">
+					{% csrf_token %}
+
+					<div class="form_item_wrapper">
+						<label>From card</label>
+						<select name="card_pk">
+							<option disabled selected value> -- select an option -- </option>
+							{% for c in cards %}									
+								<option value="{{ c.pk }}">{{ c.cardNumber }}</option>
+								<input type="hidden" name="balance" value="{{ c.initialBalance }}" />
+								<input type="hidden" name="spent_amount" value="{{ c.spentAmount }}" />
+							{% endfor %}
+						</select>
+					</div>
+
+					<div class="form_item_wrapper">
+						<label>To account</label>
+						<select name="to_account">
+							<option disabled selected value> -- select an option -- </option>
+							{% for a in customer_accounts %}
+								{% if a.isLoan == False %}									
+									<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
 								{% endif %}
-                        </form>
-					</tr>
-					{% endfor %}
-				</table>
+							{% endfor %}
+						</select>
+					</div>
+
+					<div class="form_item_wrapper">
+						<input type="number" name="card_pay" placeholder="Amount to pay" step=".01"/>
+					</div>
+
+					<div class="form_item_wrapper">
+						<input type="text" name="card_desc" placeholder="Text for payment" />
+					</div>
+
+					<button formaction="{% url 'bank_app:pay_card' %}" class="btn">Make card payment</button>
+				</form>
 			</section>
 
 			<section id="cards_overview">
@@ -248,12 +273,10 @@
 						<th></th>
 						<th>Account</th>
 						<th>Card Number</th>
-						<th>Balance</th>
+						<th>Initial balance</th>
 						<th>Expiry Date</th>
 						<th>Debt</th>
-						<th>Pay</th>
 						<th>Repay</th>
-						<th></th>
 					</tr>
 	
 					{% for c in cards %}
@@ -279,7 +302,7 @@
 										{% endif %}
 									{% endfor %}
 								</td>
-								<td>
+								<!-- <td>
 									<div class="form_item_wrapper">
 										<label>To account</label>
 										<select name="to_account">
@@ -300,15 +323,17 @@
 											Pay
 										</button>
 									</div>
-								</td>
+								</td> -->
 								{% if c.spentAmount != 0 %}
 									<td>
 										<div class="form_item_wrapper">
 											<label>From account</label>
 											<select name="from_account">
 												<option disabled selected value> -- select an option -- </option>
-												{% for a in customer_accounts %}									
-													<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+												{% for a in customer_accounts %}
+													{% if a.isLoan == False %}									
+														<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+													{% endif %}
 												{% endfor %}
 											</select>
 										</div>
@@ -321,11 +346,9 @@
 											</button>
 										</div>
 									</td>
-								{% else %}
-									<td></td>
 								{% endif %}
 								<td>
-									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Show credit card movements</button>
+									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Card movements</button>
 								</td>
 						</form>
 					</tr>

@@ -29,7 +29,6 @@ urlpatterns = [
         path('del_card/', views.del_card, name='del_card'),
         path('repay_card/', views.repay_card, name='repay_card'),
         path('pay_card/', views.pay_card, name='pay_card'),
-        path('add_interest/', views.add_interest, name='add_interest'),
         path('show_card_movements/', views.show_card_movements, name='show_card_movements'),
 ]
 

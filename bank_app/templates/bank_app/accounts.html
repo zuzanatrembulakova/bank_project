@@ -78,17 +78,17 @@
                             </td>
                             {% if a.isLoan == True %}
                                 {% for l in loans %}
-                                    {% if l.account == a.accountNumber %}
+                                    {% if l.loanAccount == a.accountNumber %}
                                         <input type="hidden" name="lpk" value="{{ l.pk }}" />
-                                        <td><input type="text" name="to_account" value="{{ l.account }}" /></td>
+                                        <input type="hidden" name="to_account" value="{{ l.account }}" />
                                         <input type="hidden" name="loan_amount" value="{{ l.loanAmount }}" />
                                         <input type="hidden" name="loan_account" value="{{ l.loanAccount }}" />
+
                                         {% if l.confirmed == 'true' %}
                                             {% for b in balances %}
                                                 {% if b.0 == a.pk %}
-                                                    {% if b.1 == 0 %}
+                                                    {% if b.1 == '0.00' %}
                                                         <td>
-                                                            <div>Completed</div>
                                                             <button formaction="{% url 'bank_app:del_loan' %}" class="icon_btn del_btn">
                                                                 <i class="fa-solid fa-trash"></i>
                                                             </button>
@@ -98,6 +98,7 @@
                                                     {% endif %}
                                                 {% endif %}
                                             {% endfor %}
+
                                         {% elif l.confirmed == 'false' %}
                                             <td>
                                                 <div>Declined</div>
@@ -105,6 +106,7 @@
                                                     <i class="fa-solid fa-trash"></i>
                                                 </button>
                                             </td>
+                                            
                                         {% else %}
                                             <td>
                                                 <button formaction="{% url 'bank_app:accept_loan' %}" class="simple_btn">
@@ -139,8 +141,10 @@
                     <label>For account</label>
                     <select name="card_account">
                         <option disabled selected value> -- select an option -- </option>
-                        {% for a in accounts %}									
+                        {% for a in accounts %}		
+                            {% if a.isLoan == False %}							
                             <option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
@@ -192,9 +196,9 @@
                                 {% endfor %}
                             </td>
                             <td>{{ c.interest }}</td>
-                            <td>
+                            <!-- <td>
                                 <button formaction="{% url 'bank_app:add_interest' %}" class="btn">Add interest</button>
-                            </td>
+                            </td> -->
                             <!-- <td>{{ c.cvvNumber }}</td> -->
                             <td>
                                 <button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">
