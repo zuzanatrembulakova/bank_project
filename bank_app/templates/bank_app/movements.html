@@ -37,6 +37,7 @@
 						<th></th>
 						<th>Date</th>
 						<th>Amount</th>
+						<th>To/from</th>
 						<th>Description</th>
 					</tr>
                    {% for am in account_movements %}
@@ -50,6 +51,7 @@
                             {% else %}
 								<th class="red_text">{{ am.value }}</th>
                             {% endif %}
+							<th>{{ am.fromAccount }}</th>
                             <th>{{ am.description }}</th>
 						</tr>
                     {% endfor %}

@@ -32,3 +32,5 @@ urlpatterns = [
         path('add_interest/', views.add_interest, name='add_interest'),
         path('show_card_movements/', views.show_card_movements, name='show_card_movements'),
 ]
+
+

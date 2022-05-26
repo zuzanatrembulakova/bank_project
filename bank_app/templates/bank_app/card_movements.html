@@ -37,6 +37,7 @@
 						<th></th>
 						<th>Date</th>
 						<th>Amount</th>
+						<th>To/from</th>
 						<th>Description</th>
 					</tr>
                    {% for cm in card_movements %}
@@ -50,6 +51,7 @@
                             {% else %}
 								<th class="red_text">{{ cm.value }}</th>
                             {% endif %}
+							<th>{{ cm.toFrom }}</th>
                             <th>{{ cm.description }}</th>
 						</tr>
                     {% endfor %}

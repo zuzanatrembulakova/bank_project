@@ -154,6 +154,7 @@ def add_account(request):
  
     account_movement = AccountMovement()
     account_movement.account = account
+    account_movement.fromAccount = 'Bank'
     account_movement.value = balance
     account_movement.description = "Initial balance"
     account_movement.save()
@@ -254,6 +255,8 @@ def do_automatic_payment():
 def transfer_money(from_account, amount, description, to_account):
     message = 'Success'
     is_error = False
+
+    from_account_number = from_account.accountNumber
  
     try:
         dest_account = Account.objects.get(accountNumber = to_account)
@@ -272,6 +275,7 @@ def transfer_money(from_account, amount, description, to_account):
  
         data = {
                 "to_account": to_account,
+                "from_account": from_account_number,
                 "amount": amount,
                 "description": description,
                 }
@@ -284,6 +288,7 @@ def transfer_money(from_account, amount, description, to_account):
  
             account_movement = AccountMovement()
             account_movement.account = from_account
+            account_movement.fromAccount = to_account
             account_movement.value = -amount
             account_movement.description = description
             account_movement.save()
@@ -300,12 +305,15 @@ def transfer_money(from_account, amount, description, to_account):
             with transaction.atomic():
                 movement_from = AccountMovement()
                 movement_from.account = from_account
+                movement_from.fromAccount = dest_account
                 movement_from.value = -amount
                 movement_from.description = description
                 movement_from.save()
  
                 movement_to = AccountMovement()
                 movement_to.account = dest_account
+                movement_to.fromAccount = from_account
+                print(movement_from.fromAccount)
                 movement_to.value = amount
                 movement_to.description = description
                 movement_to.save()
@@ -349,6 +357,7 @@ def accept_loan(request):
             with transaction.atomic():
                 movement_to = AccountMovement()
                 movement_to.account = dest_account[0]
+                movement_to.fromAccount = 'Bank'
                 movement_to.value = amount
                 movement_to.description = 'Loan'
                 movement_to.save()
@@ -398,6 +407,7 @@ def pay_loan(request):
                 with transaction.atomic():
                     movement_from = AccountMovement()
                     movement_from.account = from_account
+                    movement_from.fromAccount = 'Bank'
                     movement_from.value = -amount
                     movement_from.description = 'Loan payment'
                     movement_from.save()
@@ -465,6 +475,7 @@ def generate_card(request):
  
         card_movement = CardMovement()
         card_movement.card = card
+        card_movement.toFrom = 'Bank'
         card_movement.value = spent_amount
         card_movement.description = "Initial debt"
         card_movement.save()
@@ -512,12 +523,14 @@ def repay_card(request):
                 with transaction.atomic():
                     movement_from = AccountMovement()
                     movement_from.account = from_account
+                    movement_from.fromAccount = f"{to_card} (credit card)"
                     movement_from.value = -amount
                     movement_from.description = 'Credit card repay'
                     movement_from.save()
  
                     movement_to = CardMovement()
                     movement_to.card = dest_card
+                    movement_to.toFrom = from_account
                     movement_to.value = amount
                     movement_to.description = 'Credit card repay'
                     movement_to.save()
@@ -559,12 +572,14 @@ def pay_card(request):
                 with transaction.atomic():
                     movement_from = CardMovement()
                     movement_from.card = from_card
+                    movement_from.toFrom = to_account
                     movement_from.value = -amount
                     movement_from.description = description
                     movement_from.save()
  
                     movement_from = AccountMovement()
                     movement_from.account = to_account
+                    movement_from.fromAccount = f"{from_cardpk} (credit card)"
                     movement_from.value = amount
                     movement_from.description = description
                     movement_from.save()
@@ -607,6 +622,7 @@ def add_interest(request):
 
                     movement_to = AccountMovement()
                     movement_to.account = dest_account
+                    movement_to.fromAccount = 'Bank'
                     movement_to.value = -interest
                     movement_to.description = 'Credit card interest'
                     movement_to.save()
@@ -623,30 +639,8 @@ def add_interest(request):
             print('Debt was repayed in time')
  
     return show_accounts(request, pkcust)
-            
 
-# def add_interest(request):
- 
-#     to_card = request.POST['card_number']
-#     dest_card = CreditCard.objects.get(cardNumber = to_card)
-#     print(dest_card)
-   
-#     debt = get_repay_amount_for_card(dest_card)
-   
-#     if debt != 0:
-#         amount = (abs(debt)*15)/100
- 
-#         movement_to = CardMovement()
-#         movement_to.card = dest_card
-#         movement_to.value = -amount
-#         movement_to.description = 'Interest'
-#         movement_to.save()  
-#     else:
-#         print("Debt was repayed in time")
- 
-#     return HttpResponseRedirect(reverse('bank_app:index'))
- 
- 
+  
 def show_card_movements(request):
     context = {}
    

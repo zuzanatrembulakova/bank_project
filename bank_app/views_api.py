@@ -10,6 +10,7 @@ class ExternalTransaction(APIView):
     def post(self, request, *args, **kwargs):
         
         to_account = request.data.get('to_account')
+        from_account = request.data.get('from_account')
         amount = request.data.get('amount')
         description = request.data.get('description')
 
@@ -27,6 +28,7 @@ class ExternalTransaction(APIView):
 
             account_movement = AccountMovement()
             account_movement.account = account[0]
+            account_movement.fromAccount = from_account
             account_movement.value = amount
             account_movement.description = description
             account_movement.save()

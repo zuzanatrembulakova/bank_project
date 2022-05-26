@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -26,6 +27,7 @@ class Account(models.Model):
 
 class AccountMovement(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    fromAccount = models.CharField(max_length=20, default='undefined')
     value = models.IntegerField()
     timestamp = models.DateTimeField(default=now, editable=False)
     description = models.TextField()
@@ -69,7 +71,8 @@ class CreditCard(models.Model):
     cardNumber = models.IntegerField()
     initialBalance = models.IntegerField()
     spentAmount = models.IntegerField()
-    expiryDate = models.DateTimeField(default=now, editable=False)
+    expiryDate = models.DateField(editable=False)
+    # expiryDate = models.DateTimeField(default=now, editable=False)
     cvvNumber = models.IntegerField()
     interest = models.IntegerField()
 
@@ -78,6 +81,7 @@ class CreditCard(models.Model):
 
 class CardMovement(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE)
+    toFrom = models.CharField(max_length=20, default='undefined')
     value = models.IntegerField()
     timestamp = models.DateTimeField(default=now, editable=False)
     description = models.TextField()

@@ -19,11 +19,20 @@
 			<form method='post'>
 				<h2>Log in</h2>
 				{% csrf_token %}
-				{% if verified == 0 %}
+				{% if verified == 0 and usertype == "CUSTOMER" %}
 					<div class="form_item_wrapper">
 						<p>We've sent a verification code to your number</p>
 						<label>SMS code</label>
 						<input type="number" name="code" placeholder="Type your SMS code" />
+						<input type="hidden" name="codepk" value="{{ code.pk }}" />
+					</div>
+					<button formaction="{% url 'login_app:login_verify' %}" class="btn">Login</button>
+				{% elif verified == 0 and usertype == "BANKER" %}
+					<div class="form_item_wrapper">
+						<p>Scan the QR code</p>
+						<img id='qrcode' src="{% static 'media/qr.png' %}" alt="qrcode" />
+						<label>Secret code</label>
+						<input type="number" name="code" placeholder="Type your secret code here" />
 						<input type="hidden" name="codepk" value="{{ code.pk }}" />
 					</div>
 					<button formaction="{% url 'login_app:login_verify' %}" class="btn">Login</button>
