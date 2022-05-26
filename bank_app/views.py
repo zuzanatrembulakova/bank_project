@@ -37,18 +37,18 @@ def show_index(request, message = '', is_error = False):
         if get_user_type(request.user) == 'CUSTOMER':
             active_customer = Customer.objects.get(user = request.user)
             customer_accounts = Account.objects.filter(customer=active_customer)
-            loans = Loan.objects.filter(customer=active_customer)
+            loans = LoanRequest.objects.filter(customer=active_customer)
             cards = CreditCard.objects.filter(customer=active_customer)
  
             balances = []
             for a in customer_accounts.iterator():
-                balance = get_balance_for_account(a)
-                balances.append( (a.pk, balance) )
+                balance = round(get_balance_for_account(a), 2)
+                balances.append( (a.pk, f'{balance:,}') )
            
             card_repay_balances = []
             for c in cards.iterator():
-                card_repay_balance = get_repay_amount_for_card(c)
-                card_repay_balances.append( (c.pk, card_repay_balance) )
+                card_repay_balance = round(get_repay_amount_for_card(c), 2)
+                card_repay_balances.append( (c.pk, f'{card_repay_balance:,}') )
            
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
@@ -113,18 +113,18 @@ def show_accounts(request, pkcust):
        
         customer = get_object_or_404(Customer, pk=pkcust)
         accounts = Account.objects.filter(customer=customer)
-        loans = Loan.objects.filter(customer=customer)
+        loans = LoanRequest.objects.filter(customer=customer)
         cards = CreditCard.objects.filter(customer=customer)
  
         balances = []
         for a in accounts.iterator():
-            balance = get_balance_for_account(a)
-            balances.append( (a.pk, balance) )
+            balance = round(get_balance_for_account(a), 2)
+            balances.append( (a.pk, f'{balance:,}') )
        
         card_repay_balances = []
         for c in cards.iterator():
-            card_repay_balance = get_repay_amount_for_card(c)
-            card_repay_balances.append( (c.pk, card_repay_balance) )
+            card_repay_balance = round(get_repay_amount_for_card(c), 2)
+            card_repay_balances.append( (c.pk, f'{card_repay_balance:,}') )
  
         context = {
                 'usertype': get_user_type(request.user),
@@ -199,7 +199,7 @@ def set_transaction(request):
         from_accountpk = request.POST['from_account']
         from_account = Account.objects.get(pk = from_accountpk)
  
-        amount = int(request.POST['amount'])
+        amount = float(request.POST['amount'])
         description = request.POST['description']
  
         to_account = request.POST['to_account']
@@ -328,12 +328,39 @@ def transfer_money(from_account, amount, description, to_account):
  
 def request_loan(request):
     pk = request.POST['pk']
- 
-    loan = Loan()
-    loan.customer = Customer.objects.get(user = request.user)
+    pk = request.POST['pk']
+    pkcust = request.POST['pkcust']
+    amount = int(request.POST['loan_amount'])
+    to_account = request.POST['to_account']
+    number = random.randint(10000,99999)
+    loan_account = f"LOAN_{to_account}{number}"
+
+    # pkcust = request.POST['pk']
+
+    # account_number = request.POST['number']
+    # balance = request.POST['balance']
+
+    customer = Customer.objects.get(user = request.user)
+
+    account = Account()
+    account.customer = customer
+    account.accountNumber = loan_account
+    account.isLoan = True
+    account.save()
+
+    account_movement = AccountMovement()
+    account_movement.account = account
+    account_movement.fromAccount = 'Bank'
+    account_movement.value = -amount
+    account_movement.description = "Loan"
+    account_movement.save()
+
+    loan = LoanRequest()
+    loan.customer = customer
     loan.account = Account.objects.get(pk=pk)
-    loan.loanAmount = request.POST['loan_amount']
-    loan.remainingAmount = request.POST['loan_amount']
+    loan.loanAccount = Account.objects.get(accountNumber=loan_account)
+    loan.loanAmount = amount
+    # loan.remainingAmount = request.POST['loan_amount']
     loan.save()
  
     return HttpResponseRedirect(reverse('bank_app:index'))
@@ -345,16 +372,24 @@ def accept_loan(request):
     # is_error = False
  
     if request.method == "POST":
-        pk = request.POST['pk']
-        pkcust = request.POST['pkcust']
+        pk = request.POST['lpk']
+        pkcust = request.POST['pk_cust']
         amount = int(request.POST['loan_amount'])
         to_account = request.POST['to_account']
         dest_account = Account.objects.filter(accountNumber = to_account)
-       
-        loan = Loan.objects.get(pk = pk)
+        number = random.randint(10000,99999)
+        loan_account = f"loan{to_account}{number}"
+        loan = LoanRequest.objects.get(pk = pk)
+        
+        # pkcust = request.POST['pk']
+ 
+        # account_number = request.POST['number']
+        # balance = request.POST['balance']
+    
+        customer = get_object_or_404(Customer, pk=pkcust)
  
         try:
-            with transaction.atomic():
+            with transaction.atomic():          
                 movement_to = AccountMovement()
                 movement_to.account = dest_account[0]
                 movement_to.fromAccount = 'Bank'
@@ -362,75 +397,80 @@ def accept_loan(request):
                 movement_to.description = 'Loan'
                 movement_to.save()
  
+                loan.loanAccount = loan_account
                 loan.confirmed = 'true'
                 loan.save()
  
         except IntegrityError:
-            message = 'Transaction failed'
-            is_error = True
+            # message = 'Transaction failed'
+            # is_error = True
             print('Transaction failed')
  
     return show_accounts(request, pkcust)
  
  
 def decline_loan(request):
-    pk = request.POST['pk']
-    pkcust = request.POST['pkcust']
+    pk = request.POST['lpk']
+    pkcust = request.POST['pk_cust']
  
-    loan = Loan.objects.get(pk = pk)
+    loan = LoanRequest.objects.get(pk = pk)
     loan.confirmed = 'false'
     loan.save()
  
     return show_accounts(request, pkcust)
  
  
-@transaction.atomic
-def pay_loan(request):
-    message = 'Success'
-    is_error = False
+# @transaction.atomic
+# def pay_loan(request):
+#     message = 'Success'
+#     is_error = False
  
-    if request.method == "POST":
-        pk = request.POST['pk']
-        account = request.POST['account']
-        from_account = Account.objects.get(accountNumber = account)
-        remaining_amount = int(request.POST['remaining_amount'])
-        amount = int(request.POST['loan_transfer'])
-        from_balance = get_balance_for_account(from_account)
-        loan = Loan.objects.get(pk = pk)
+#     if request.method == "POST":
+#         pk = request.POST['pk']
+#         account = request.POST['account']
+#         from_account = Account.objects.get(accountNumber = account)
+#         remaining_amount = int(request.POST['remaining_amount'])
+#         amount = int(request.POST['loan_transfer'])
+#         from_balance = get_balance_for_account(from_account)
+#         loan = LoanRequest.objects.get(pk = pk)
  
-        if amount > remaining_amount:
-            print('The entered amount exceeds the loan')
+#         if amount > remaining_amount:
+#             print('The entered amount exceeds the loan')
        
-        elif from_balance > amount:
+#         elif from_balance > amount:
  
-            try:
-                with transaction.atomic():
-                    movement_from = AccountMovement()
-                    movement_from.account = from_account
-                    movement_from.fromAccount = 'Bank'
-                    movement_from.value = -amount
-                    movement_from.description = 'Loan payment'
-                    movement_from.save()
+#             try:
+#                 with transaction.atomic():
+#                     movement_from = AccountMovement()
+#                     movement_from.account = from_account
+#                     movement_from.fromAccount = 'Bank'
+#                     movement_from.value = -amount
+#                     movement_from.description = 'Loan payment'
+#                     movement_from.save()
  
-                    loan.remainingAmount = remaining_amount - amount
-                    loan.save()
+#                     loan.remainingAmount = remaining_amount - amount
+#                     loan.save()
  
-            except IntegrityError:
-                message = 'Transaction  failed'
-                is_error = True
-                print('Transaction failed')
+#             except IntegrityError:
+#                 message = 'Transaction  failed'
+#                 is_error = True
+#                 print('Transaction failed')
  
-        else:
-            print('Insufficient funds')
+#         else:
+#             print('Insufficient funds')
  
-    return show_index(request, message, is_error)
+#     return show_index(request, message, is_error)
  
  
 def del_loan(request):
-    pk = request.POST['pk']
-    pkcust = request.POST['pkcust']
+    pk = request.POST['lpk']
+    pkcust = request.POST['pk_cust']
+    loan_acc_number = request.POST['loan_account']
+
+    account = get_object_or_404(Account, accountNumber=loan_acc_number)
+    account.delete()
  
-    loan = get_object_or_404(Loan, pk=pk)
+    loan = get_object_or_404(LoanRequest, pk=pk)
     loan.delete()
    
     return show_accounts(request, pkcust)
@@ -561,11 +601,11 @@ def pay_card(request):
         from_card = CreditCard.objects.get(cardNumber = from_cardpk)
         to_accountpk = request.POST['to_account']
         to_account = Account.objects.get(pk = to_accountpk)
-        balance = int(request.POST['balance'])
-        amount = int(request.POST['card_pay'])
+        balance = float(request.POST['balance'])
+        amount = float(request.POST['card_pay'])
         # card = CreditCard.objects.get(pk = pk)
         description = request.POST['card_desc']
-        remaining_amount = int(request.POST['spent_amount'])
+        remaining_amount = float(request.POST['spent_amount'])
  
         if balance > amount:
             try:

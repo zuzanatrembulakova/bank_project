@@ -109,8 +109,10 @@
 						<label>From account</label>
 						<select name="from_account">
 							<option disabled selected value> -- select an option -- </option>
-							{% for a in customer_accounts %}									
-								<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+							{% for a in customer_accounts %}
+								{% if a.isLoan == False %}									
+									<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+								{% endif %}
 							{% endfor %}
 						</select>
 					</div>
@@ -121,7 +123,7 @@
 					</div>
 					<div class="form_item_wrapper">
 						<label>Amount</label>
-						<input type="number" name="amount" placeholder="Amount to transfer">
+						<input type="number" name="amount" placeholder="Amount to transfer (DKK)" step=".01">
 					</div>
 					<div class="form_item_wrapper">
 						<label>Description</label>
@@ -168,18 +170,20 @@
 						<form method="post">
 							{% csrf_token %}
 								<input type="hidden" name="pk" value="{{ a.pk }}" />
+								<input type="hidden" name="pkcust" value="{{ c.pk }}" />
+								<input type="hidden" name="to_account" value="{{ a.accountNumber }}" />
 								<td>{{ forloop.counter }}</td>
 								<td>{{ a.accountNumber }}</td>
 								<td>
 									{% for b in balances %}
 										{% if b.0 == a.pk %}
-											{{ b.1 }}
+											{{ b.1 }} DKK
 										{% endif %}
 									{% endfor %}
 								</td>
 								<td>
 									{% if active_customer.ranking.loan == True %}
-										<input type="number" name="loan_amount" placeholder="Amount to loan" />
+										<input type="number" name="loan_amount" placeholder="Amount to loan" step=".01" />
 										<button formaction="{% url 'bank_app:request_loan' %}" class="simple_btn">
 											Request
 										</button>
@@ -201,9 +205,10 @@
                 <table>
                     <tr>
                         <th></th>
+						<th>Loan Account</th>
                         <th>Bank Account</th>
                         <th>Loan Amount</th>
-                        <th>Amount to Pay</th>
+                        <!-- <th>Amount to Pay</th> -->
                         <th>Make a Payment</th>
                     </tr>
  
@@ -216,28 +221,15 @@
                             {% csrf_token %}
                                 <input type="hidden" name="pk" value="{{ l.pk }}" />
 								<input type="hidden" name="account" value="{{ l.account }}" />
-								<input type="hidden" name="remaining_amount" value="{{ l.remainingAmount }}" />
+								<!-- <input type="hidden" name="remaining_amount" value="{{ l.remainingAmount }}" /> -->
 								<!-- <input type="hidden" name="cpk" value="{{ c.pk }}"> -->
                                 <td>{{ forloop.counter }}</td>
+								<td>{{ l.loanAccount }}</td>
                                 <td>{{ l.account }}</td>
-                                <td>{{ l.loanAmount }}</td>
-                                <td>{{ l.remainingAmount }}</td>
-								<!-- nefunguje -->
+                                <td>{{ l.loanAmount }} DKK</td>
+                                <!-- <td>{{ l.remainingAmount }}</td> -->
 								{% if l.confirmed == 'true' %}
-									{% if l.remainingAmount == 0 %}
-										<td>Completed</td>
-									{% else %}
-										<td>
-											<div class="form_item_wrapper">
-												<input type="number" name="loan_transfer" placeholder="Amount to transfer" />
-											</div>
-											<div class="form_item_wrapper">
-												<button formaction="{% url 'bank_app:pay_loan' %}" class="btn">
-													Pay
-												</button>
-											</div>
-										</td>
-									{% endif %}
+									<td>Loan accepted</td>
 								{% elif l.confirmed == 'false'%}
 									<td>Loan declined</td>
 								{% else %}
@@ -278,7 +270,7 @@
 								<td>{{ forloop.counter }}</td>
 								<td>{{ c.account }}</td>
 								<td>{{ c.cardNumber }}</td>
-								<td>{{ c.initialBalance }}</td>
+								<td>{{ c.initialBalance }} DKK</td>
 								<td>{{ c.expiryDate }}</td>
 								<td>
 									{% for b in card_repay_balances %}
@@ -298,7 +290,7 @@
 										</select>
 									</div>
 									<div class="form_item_wrapper">
-										<input type="number" name="card_pay" placeholder="Amount to pay" />
+										<input type="number" name="card_pay" placeholder="Amount to pay" step=".01"/>
 									</div>
 									<div class="form_item_wrapper">
 										<input type="text" name="card_desc" placeholder="Text for payment" />
@@ -321,7 +313,7 @@
 											</select>
 										</div>
 										<div class="form_item_wrapper">
-											<input type="number" name="card_repay" placeholder="Amount to repay" />
+											<input type="number" name="card_repay" placeholder="Amount to repay" step=".01"/>
 										</div>
 										<div class="form_item_wrapper">
 											<button formaction="{% url 'bank_app:repay_card' %}" class="btn">
