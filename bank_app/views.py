@@ -228,8 +228,7 @@ def set_transaction(request):
             aut_payment.repeatNumber = repeat_number
             aut_payment.repeatEvery = repeat_every
             aut_payment.save()
- 
-       
+      
         transaction_result = transfer_money(from_account, amount, description, to_account)
  
         if transaction_result == None:
@@ -264,9 +263,11 @@ def transfer_money(from_account, amount, description, to_account):
     is_error = False
 
     from_account_number = from_account.accountNumber
+    from_currency = from_account.currency
  
     try:
         dest_account = Account.objects.get(accountNumber = to_account)
+        dest_currency = dest_account.currency
     except:
         dest_account = None
  
@@ -308,6 +309,11 @@ def transfer_money(from_account, amount, description, to_account):
  
     else:
         # Dest account exists in our bank
+
+        if from_currency != dest_currency:
+            currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=dest_currency)
+            amount = amount*currency_ratio
+
         try:
             with transaction.atomic():
                 movement_from = AccountMovement()
@@ -320,7 +326,6 @@ def transfer_money(from_account, amount, description, to_account):
                 movement_to = AccountMovement()
                 movement_to.account = dest_account
                 movement_to.fromAccount = from_account
-                print(movement_from.fromAccount)
                 movement_to.value = amount
                 movement_to.description = description
                 movement_to.save()
@@ -593,7 +598,7 @@ def add_interest():
 @transaction.atomic
 def charge_interest():
 
-    cards = CreditCard.objects.all
+    cards = CreditCard.objects.all()
 
     for c in cards.iterator():
         
