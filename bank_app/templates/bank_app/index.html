@@ -296,29 +296,29 @@
 					<tr>
 						<td colspan="5" id="repay">
 							{% for b in card_repay_balances %}
-							{% if b.0 == c.pk %}
-								{% if b.1 != 0 %}
-									<div>
-										<div class="form_item_wrapper">
-											<label>From account</label>
-											<select name="from_account">
-												<option disabled selected value> -- select an option -- </option>
-												{% for a in customer_accounts %}
-													{% if a.isLoan == False %}									
-														<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
-													{% endif %}
-												{% endfor %}
-											</select>
+								{% if b.0 == c.pk %}
+									{% if b.1 != '0.00' %}
+										<div>
+											<div class="form_item_wrapper">
+												<label>From account</label>
+												<select name="from_account">
+													<option disabled selected value> -- select an option -- </option>
+													{% for a in customer_accounts %}
+														{% if a.isLoan == False %}									
+															<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+														{% endif %}
+													{% endfor %}
+												</select>
+											</div>
+											<div class="form_item_wrapper">
+												<input type="number" name="card_repay" placeholder="Amount to repay" step=".01"/>
+											</div>
+											<div class="form_item_wrapper">
+												<button formaction="{% url 'bank_app:pay_debt' %}" class="btn">Pay debt</button>
+											</div>
 										</div>
-										<div class="form_item_wrapper">
-											<input type="number" name="card_repay" placeholder="Amount to repay" step=".01"/>
-										</div>
-										<div class="form_item_wrapper">
-											<button formaction="{% url 'bank_app:pay_debt' %}" class="btn">Pay debt</button>
-										</div>
-									</div>
-								{% endif %}
-							{% endif %}	
+									{% endif %}
+								{% endif %}	
 							{% endfor %}
 						</td>
 						</form>

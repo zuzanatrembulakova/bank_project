@@ -481,22 +481,15 @@ def pay_debt(request):
         card = CreditCard.objects.get(pk=pk)
 
         from_accountpk = request.POST['from_account']
-        from_account = Account.objects.get(pk = from_accountpk)
+        from_account = Account.objects.get(pk=from_accountpk)
        
         amount = float(request.POST['card_repay'])
         remaining_amount = float(get_repay_amount_for_card(card))
-        print(abs(remaining_amount))
-        initial_balance = card.initialBalance
 
         from_balance = get_balance_for_account(from_account)
 
         if amount <= 0 or amount > abs(remaining_amount):
             print('The amount you entered is not valid or exceeds the debt')
-        elif amount > initial_balance and abs(remaining_amount) < initial_balance:
-            print('The amount you entered is not valid')
- 
-        # if amount <= 0 or amount > abs(to_balance):
-        #     print('The amount you entered is not valid or exceeds the debt')
        
         elif from_balance > amount:
  
@@ -542,8 +535,6 @@ def pay_card(request):
         balance = from_card.initialBalance
         amount = float(request.POST['card_pay'])
         description = request.POST['card_desc']
-
-        remaining_amount = float(get_repay_amount_for_card(from_card))
  
         if balance > amount:
             try:
