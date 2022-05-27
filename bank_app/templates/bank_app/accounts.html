@@ -197,7 +197,7 @@
                             <td>{{ c.interest }}
                                 {% if c.interest != 0.00 %}
                                     <input type="hidden" name="interest" value="{{ c.interest }}" />
-                                    <button formaction="{% url 'bank_app:pay_interest' %}" class="btn">Charge interest</button>
+                                    <button formaction="{% url 'bank_app:pay_interest' %}" class="btn">Charge</button>
                                 {% endif %}
                             </td>
                             <td>

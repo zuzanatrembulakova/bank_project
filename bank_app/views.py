@@ -494,7 +494,6 @@ def pay_debt(request):
             print('The amount you entered is not valid or exceeds the debt')
         elif amount > initial_balance and abs(remaining_amount) < initial_balance:
             print('The amount you entered is not valid')
-        
  
         # if amount <= 0 or amount > abs(to_balance):
         #     print('The amount you entered is not valid or exceeds the debt')
@@ -589,18 +588,34 @@ def add_interest():
             c.save()
     return
 
- 
+
+@transaction.atomic
 def pay_interest(request):
     pkcust = request.POST['pkcust']
-    account = request.POST['to_account']
+    account_number = request.POST['to_account']
+    card_number = request.POST['card_number']
     interest = float(request.POST['interest'])
 
-    movement = AccountMovement()
-    movement.account = account
-    movement.fromAccount = 'Bank'
-    movement.value = -interest
-    movement.description = 'Credit card interest'
-    movement.save()
+    account = Account.objects.get(accountNumber=account_number)
+    card = CreditCard.objects.get(cardNumber=card_number)
+
+    try:
+        with transaction.atomic():
+
+            movement = AccountMovement()
+            movement.account = account
+            movement.fromAccount = 'Bank'
+            movement.value = -interest
+            movement.description = 'Credit card interest'
+            movement.save()
+            
+            card.interest = 0
+            card.save()
+
+    except IntegrityError:
+        message = 'Transaction  failed'
+        is_error = True
+        print('Transaction failed')
 
     return show_accounts(request, pkcust)
 
