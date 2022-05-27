@@ -79,8 +79,8 @@ class CreditCard(models.Model):
     cvvNumber = models.IntegerField()
     interest = models.DecimalField(max_digits=30, decimal_places=2)
 
-    def __str__(self):
-        return f"{self.cardNumber} - {self.initialBalance} - {self.spentAmount} - {self.expiryDate} - {self.cvvNumber}"
+    # def __str__(self):
+        # return f"{self.cardNumber} - {self.initialBalance} - {self.spentAmount} - {self.expiryDate} - {self.cvvNumber}"
 
 class CardMovement(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE)

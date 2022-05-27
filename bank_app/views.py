@@ -35,7 +35,7 @@ def show_index(request, message = '', is_error = False):
             context['customer_count'] = Customer.objects.all().count()
  
         if get_user_type(request.user) == 'CUSTOMER':
-            active_customer = Customer.objects.get(user = request.user)
+            active_customer = Customer.objects.get(user=request.user)
             customer_accounts = Account.objects.filter(customer=active_customer)
             loans = LoanRequest.objects.filter(customer=active_customer)
             cards = CreditCard.objects.filter(customer=active_customer)
@@ -44,11 +44,14 @@ def show_index(request, message = '', is_error = False):
             for a in customer_accounts.iterator():
                 balance = round(get_balance_for_account(a), 2)
                 balances.append( (a.pk, f'{balance:,}') )
-           
+            print(customer_accounts)
+            print(cards)
             card_repay_balances = []
             for c in cards.iterator():
+                print('2')
                 card_repay_balance = round(get_repay_amount_for_card(c), 2)
                 card_repay_balances.append( (c.pk, f'{card_repay_balance:,}') )
+            print('3')
            
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
@@ -451,6 +454,7 @@ def generate_card(request):
         card.spentAmount = spent_amount
         card.expiryDate = expiry_date
         card.cvvNumber = cvv
+        card.interest = 0
         card.save()
  
         card_movement = CardMovement()

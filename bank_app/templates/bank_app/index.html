@@ -236,8 +236,6 @@
 							<option disabled selected value> -- select an option -- </option>
 							{% for c in cards %}									
 								<option value="{{ c.pk }}">{{ c.cardNumber }}</option>
-								<input type="hidden" name="balance" value="{{ c.initialBalance }}" />
-								<input type="hidden" name="spent_amount" value="{{ c.spentAmount }}" />
 							{% endfor %}
 						</select>
 					</div>
@@ -276,7 +274,7 @@
 						<th>Initial balance</th>
 						<th>Expiry Date</th>
 						<th>Debt</th>
-						<th>Repay</th>
+						<th></th>
 					</tr>
 	
 					{% for c in cards %}
@@ -290,7 +288,7 @@
 								<input type="hidden" name="card_number" value="{{ c.cardNumber }}" />
 								<input type="hidden" name="spent_amount" value="{{ c.spentAmount }}" />
 								<input type="hidden" name="balance" value="{{ c.initialBalance }}" />
-								<td>{{ forloop.counter }}</td>
+								<td rowspan="2">{{ forloop.counter }}</td>
 								<td>{{ c.account }}</td>
 								<td>{{ c.cardNumber }}</td>
 								<td>{{ c.initialBalance }} DKK</td>
@@ -324,8 +322,14 @@
 										</button>
 									</div>
 								</td> -->
-								{% if c.spentAmount != 0 %}
-									<td>
+								<td rowspan="2">
+									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Card movements</button>
+								</td>
+					</tr>
+					<tr>
+								<td colspan="5">
+									{% if c.spentAmount != 0 %}
+								
 										<div class="form_item_wrapper">
 											<label>From account</label>
 											<select name="from_account">
@@ -345,10 +349,8 @@
 												Repay
 											</button>
 										</div>
-									</td>
-								{% endif %}
-								<td>
-									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Card movements</button>
+								
+									{% endif %}
 								</td>
 						</form>
 					</tr>
