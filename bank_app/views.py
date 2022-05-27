@@ -597,7 +597,7 @@ def add_interest():
 
 @transaction.atomic
 def charge_interest():
-
+    print('hhhh')
     cards = CreditCard.objects.all()
 
     for c in cards.iterator():
@@ -607,7 +607,7 @@ def charge_interest():
                 with transaction.atomic():
 
                     movement = AccountMovement()
-                    movement.account = c.acount
+                    movement.account = c.account
                     movement.fromAccount = 'Bank'
                     movement.value = -c.interest
                     movement.description = 'Credit card interest'
