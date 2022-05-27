@@ -487,13 +487,16 @@ def pay_debt(request):
        
         amount = float(request.POST['card_repay'])
         remaining_amount = float(get_repay_amount_for_card(card))
-
+        print(abs(remaining_amount))
         initial_balance = card.initialBalance
 
         from_balance = get_balance_for_account(from_account)
 
-        if amount > initial_balance or amount <= 0 or amount > remaining_amount:
+        if amount <= 0 or amount > abs(remaining_amount):
             print('The amount you entered is not valid or exceeds the debt')
+        elif amount > initial_balance and abs(remaining_amount) < initial_balance:
+            print('The amount you entered is not valid')
+        
  
         # if amount <= 0 or amount > abs(to_balance):
         #     print('The amount you entered is not valid or exceeds the debt')
