@@ -29,6 +29,7 @@ urlpatterns = [
         path('pay_debt/', views.pay_debt, name='pay_debt'),
         path('pay_card/', views.pay_card, name='pay_card'),
         path('show_card_movements/', views.show_card_movements, name='show_card_movements'),
+        path('pay_interest/', views.pay_interest, name='pay_interest'),
 ]
 
 

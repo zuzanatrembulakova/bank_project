@@ -167,6 +167,7 @@
                     <th>Balance</th>
                     <th>Expiry Date</th>
                     <th>Debt</th>
+                    <th>Interest</th>
                     <th></th>
                 </tr>
 
@@ -192,6 +193,12 @@
                                         {{ b.1 }}
                                     {% endif %}
                                 {% endfor %}
+                            </td>  
+                            <td>{{ c.interest }}
+                                {% if c.interest != 0.00 %}
+                                    <input type="hidden" name="interest" value="{{ c.interest }}" />
+                                    <button formaction="{% url 'bank_app:pay_interest' %}" class="btn">Charge interest</button>
+                                {% endif %}
                             </td>
                             <td>
                                 <button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">

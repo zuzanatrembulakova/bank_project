@@ -119,12 +119,12 @@ def show_accounts(request, pkcust):
         balances = []
         for a in accounts.iterator():
             balance = round(get_balance_for_account(a), 2)
-            balances.append( (a.pk, f'{balance:,}') )
+            balances.append((a.pk, f'{balance:,}'))
        
         card_repay_balances = []
         for c in cards.iterator():
             card_repay_balance = round(get_repay_amount_for_card(c), 2)
-            card_repay_balances.append( (c.pk, f'{card_repay_balance:,}') )
+            card_repay_balances.append((c.pk, f'{card_repay_balance:,}'))
  
         context = {
                 'usertype': get_user_type(request.user),
@@ -432,8 +432,7 @@ def generate_card(request):
     card_number = random.randint(1000000000000000,9999999999999999)
     cvv = random.randint(100,999)
 
-    card_balance = request.POST['initial_card_balance']
-    spent_amount = 0
+    card_balance = float(request.POST['initial_card_balance'])
 
     current_date = datetime.today()
     expiry_date = current_date + timedelta(days=(years*days_per_year))
@@ -448,15 +447,14 @@ def generate_card(request):
         card.account = account
         card.cardNumber = card_number
         card.initialBalance = card_balance
-        card.spentAmount = spent_amount
         card.expiryDate = expiry_date
         card.cvvNumber = cvv
         card.save()
  
         card_movement = CardMovement()
         card_movement.card = card
+        card_movement.value = 0
         card_movement.toFrom = 'Bank'
-        card_movement.value = spent_amount
         card_movement.description = "Initial debt"
         card_movement.save()
  
@@ -519,9 +517,6 @@ def pay_debt(request):
                     movement_to.description = 'Credit card repay'
                     movement_to.save()
  
-                    card.spentAmount = remaining_amount + amount
-                    card.save()
- 
             except IntegrityError:
                 message = 'Transaction  failed'
                 is_error = True
@@ -568,9 +563,6 @@ def pay_card(request):
                     movement_from.description = description
                     movement_from.save()
  
-                    from_card.spentAmount = remaining_amount - amount
-                    from_card.save()
- 
             except IntegrityError:
                 message = 'Transaction  failed'
                 is_error = True
@@ -591,56 +583,25 @@ def add_interest():
         debt = get_repay_amount_for_card(c)
 
         if debt != 0:
-           
             interest = (abs(debt)*15)/100
 
-            movement = CardMovement()
-            movement.card = c
-            movement.toFrom = 'Bank'
-            movement.value = -interest
-            movement.description = 'Interest'
-            movement.save()
-
+            c.interest = c.interest + interest
+            c.save()
     return
 
  
-@transaction.atomic
-def add_interest2(request):
-    
-    if request.method == "POST":
-        pkcust = request.POST['pkcust']
-        to_account = request.POST['to_account']
-        dest_account = Account.objects.get(accountNumber = to_account)
-        print(dest_account)
-    
-        cardpk = request.POST['card_number']
-        card = CreditCard.objects.get(cardNumber = cardpk)
+def pay_interest(request):
+    pkcust = request.POST['pkcust']
+    account = request.POST['to_account']
+    interest = float(request.POST['interest'])
 
-        debt = get_repay_amount_for_card(card)
-    
-        if debt != 0:
-            try:
-                with transaction.atomic():
-                    interest = (abs(debt)*15)/100
+    movement = AccountMovement()
+    movement.account = account
+    movement.fromAccount = 'Bank'
+    movement.value = -interest
+    movement.description = 'Credit card interest'
+    movement.save()
 
-                    movement = AccountMovement()
-                    movement.account = dest_account
-                    movement.fromAccount = 'Bank'
-                    movement.value = -interest
-                    movement.description = 'Credit card interest'
-                    movement.save()
- 
-                    card.interest = +interest
-                    card.save()
- 
-            except IntegrityError:
-                message = 'Transaction  failed'
-                is_error = True
-                print('Transaction failed')
- 
-        else:
-            print('Debt was repayed in time')
- 
     return show_accounts(request, pkcust)
 
   

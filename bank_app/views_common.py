@@ -19,5 +19,5 @@ def get_balance_for_account(acc:Account) -> int:
 
 def get_repay_amount_for_card(card:CreditCard) -> int:
     result = CardMovement.objects.filter(card = card).aggregate(Sum('value'))
-    return result['value__sum']
+    return result['value__sum'] if result['value__sum'] != None else 0
 
