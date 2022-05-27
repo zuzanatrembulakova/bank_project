@@ -22,10 +22,12 @@ def show_index(request, message = '', is_error = False):
     if request.user.is_authenticated:
  
         rankings = Ranking.objects.all()
+        currencies = Currency.objects.all()
  
         context = {
             'usertype': get_user_type(request.user),
             'rankings': rankings,
+            'currencies': currencies,
             'message': message,
             'is_error': is_error,
         }
@@ -43,12 +45,12 @@ def show_index(request, message = '', is_error = False):
             balances = []
             for a in customer_accounts.iterator():
                 balance = round(get_balance_for_account(a), 2)
-                balances.append( (a.pk, f'{balance:,}') )
+                balances.append((a.pk, balance, a.currency))
             
             card_repay_balances = []
             for c in cards.iterator():
                 card_repay_balance = round(get_repay_amount_for_card(c), 2)
-                card_repay_balances.append( (c.pk, f'{card_repay_balance:,}') )
+                card_repay_balances.append((c.pk, card_repay_balance))
            
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
@@ -112,6 +114,7 @@ def show_accounts(request, pkcust):
     if request.user.is_authenticated and get_user_type(request.user) == "BANKER":
        
         customer = get_object_or_404(Customer, pk=pkcust)
+        currencies = Currency.objects.all() 
         accounts = Account.objects.filter(customer=customer)
         loans = LoanRequest.objects.filter(customer=customer)
         cards = CreditCard.objects.filter(customer=customer)
@@ -119,17 +122,19 @@ def show_accounts(request, pkcust):
         balances = []
         for a in accounts.iterator():
             balance = round(get_balance_for_account(a), 2)
-            balances.append((a.pk, f'{balance:,}'))
+            balances.append((a.pk, balance, a.currency))
        
         card_repay_balances = []
         for c in cards.iterator():
             card_repay_balance = round(get_repay_amount_for_card(c), 2)
-            card_repay_balances.append((c.pk, f'{card_repay_balance:,}'))
+            account = Account.objects.get(accountNumber=c.account)
+            card_repay_balances.append((c.pk, card_repay_balance, account.currency))
  
         context = {
                 'usertype': get_user_type(request.user),
                 'customer': customer,
                 'accounts': accounts,
+                'currencies': currencies,
                 'balances': balances,
                 'card_repay_balances': card_repay_balances,
                 'loans': loans,
@@ -144,11 +149,14 @@ def add_account(request):
  
     account_number = request.POST['number']
     balance = request.POST['balance']
+    currencypk = request.POST['account_currency']
  
     customer = get_object_or_404(Customer, pk=pkcust)
+    currency = Currency.objects.get(pk=currencypk)
  
     account = Account()
     account.customer = customer
+    account.currency = currency
     account.accountNumber = account_number
     account.save()
  
@@ -428,6 +436,7 @@ def generate_card(request):
  
     customer = get_object_or_404(Customer, pk=pkcust)
     account = get_object_or_404(Account, pk=accountpk)
+    currency = account.currency
 
     card_number = random.randint(1000000000000000,9999999999999999)
     cvv = random.randint(100,999)
@@ -445,6 +454,7 @@ def generate_card(request):
         card = CreditCard()
         card.customer = customer
         card.account = account
+        card.currency = currency
         card.cardNumber = card_number
         card.initialBalance = card_balance
         card.expiryDate = expiry_date
@@ -548,7 +558,7 @@ def pay_card(request):
  
                     movement_from = AccountMovement()
                     movement_from.account = dest_account
-                    movement_from.fromAccount = f"{from_cardpk} (credit card)"
+                    movement_from.fromAccount = f"{from_card.cardNumber} (credit card)"
                     movement_from.value = amount
                     movement_from.description = description
                     movement_from.save()
@@ -604,8 +614,6 @@ def pay_interest(request):
             card.save()
 
     except IntegrityError:
-        message = 'Transaction  failed'
-        is_error = True
         print('Transaction failed')
 
     return show_accounts(request, pkcust)

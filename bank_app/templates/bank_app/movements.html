@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,20 +37,20 @@
 					<tr>
 						<th></th>
 						<th>Date</th>
-						<th>Amount (DKK)</th>
+						<th>Amount ({{ account.currency }})</th>
 						<th>To/from</th>
 						<th>Description</th>
 					</tr>
                    {% for am in account_movements %}
 				   		<tr>
                             <th>{{ forloop.counter }}</th>
-                            <th>{{ am.timestamp }}</th>
+                            <th>{{ am.timestamp|naturalday }}</th>
                             {% if am.value > 0 %}
-                                <th class="green_text">+{{ am.value }}</th>
+                                <th class="green_text">+{{ am.value|intcomma }}</th>
 							{% elif am.value == 0 %}
 								<th>{{ am.value }}</th>
                             {% else %}
-								<th class="red_text">{{ am.value }}</th>
+								<th class="red_text">{{ am.value|intcomma }}</th>
                             {% endif %}
 							<th>{{ am.fromAccount }}</th>
                             <th>{{ am.description }}</th>

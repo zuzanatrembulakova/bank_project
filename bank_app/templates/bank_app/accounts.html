@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -43,6 +44,15 @@
                     <label>Initial Balance</label>
                     <input type="number" name="balance" placeholder="Set Initial Balance (DKK)" step=".01"/>
                 </div>
+                <div class="form_item_wrapper">
+                    <label>Account currency</label>
+                    <select name="account_currency">
+                        <option disabled selected value> -- select an option -- </option>
+                        {% for c in currencies %}									
+                            <option value="{{ c.pk }}">{{ c.type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 <input type="hidden" name="pk" value="{{ customer.pk }}" />
                 <button formaction="{% url 'bank_app:add_account' %}" class="btn">Add account</button>
             </form>
@@ -72,7 +82,7 @@
                             <td>
                                 {% for b in balances %}
                                     {% if b.0 == a.pk %}
-                                        {{ b.1 }}
+                                        {{ b.1|intcomma }} {{ b.2 }}
                                     {% endif %}
                                 {% endfor %}
                             </td>
@@ -101,7 +111,6 @@
 
                                         {% elif l.confirmed == 'false' %}
                                             <td>
-                                                <div>Declined</div>
                                                 <button formaction="{% url 'bank_app:del_loan' %}" class="icon_btn del_btn">
                                                     <i class="fa-solid fa-trash"></i>
                                                 </button>
@@ -143,14 +152,14 @@
                         <option disabled selected value> -- select an option -- </option>
                         {% for a in accounts %}		
                             {% if a.isLoan == False %}							
-                            <option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+                            <option value="{{ a.pk }}">{{ a.accountNumber }} ({{ a.currency }})</option>
                             {% endif %}
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form_item_wrapper">
                     <label>Initial Balance</label>
-                    <input type="number" name="initial_card_balance" placeholder="Set Initial Credit Card Balance (DKK)" step=".01"/>
+                    <input type="number" name="initial_card_balance" placeholder="Set Initial Credit Card Balance" step=".01"/>
                 </div>
                 <input type="hidden" name="pk" value="{{ customer.pk }}" />
                 <button formaction="{% url 'bank_app:generate_card' %}" class="btn" id="generate_card_btn">Generate card</button>
@@ -185,16 +194,16 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ c.account }}</td>
                             <td>{{ c.cardNumber }}</td>
-                            <td>{{ c.initialBalance }} DKK</td>
+                            <td>{{ c.initialBalance|intcomma }} {{ c.currency }}</td>
                             <td>{{ c.expiryDate }}</td>
                             <td>
                                 {% for b in card_repay_balances %}
                                     {% if b.0 == c.pk %}
-                                        {{ b.1 }}
+                                        {{ b.1|intcomma }} {{ b.2 }}
                                     {% endif %}
                                 {% endfor %}
                             </td>  
-                            <td>{{ c.interest }}
+                            <td>{{ c.interest|intcomma }}
                                 {% if c.interest != 0.00 %}
                                     <input type="hidden" name="interest" value="{{ c.interest }}" />
                                     <button formaction="{% url 'bank_app:pay_interest' %}" class="btn">Charge</button>

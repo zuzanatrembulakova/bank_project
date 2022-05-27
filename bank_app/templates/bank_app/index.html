@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -111,7 +112,7 @@
 							<option disabled selected value> -- select an option -- </option>
 							{% for a in customer_accounts %}
 								{% if a.isLoan == False %}									
-									<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+									<option value="{{ a.pk }}">{{ a.accountNumber }} ({{ a.currency }})</option>
 								{% endif %}
 							{% endfor %}
 						</select>
@@ -123,7 +124,7 @@
 					</div>
 					<div class="form_item_wrapper">
 						<label>Amount</label>
-						<input type="number" name="amount" placeholder="Amount to transfer (DKK)" step=".01">
+						<input type="number" name="amount" placeholder="Amount to transfer" step=".01">
 					</div>
 					<div class="form_item_wrapper">
 						<label>Description</label>
@@ -176,14 +177,14 @@
 								<td>
 									{% for b in balances %}
 										{% if b.0 == a.pk %}
-											{{ b.1 }} DKK
+											{{ b.1|intcomma }} {{ b.2 }}
 										{% endif %}
 									{% endfor %}
 								</td>
 								<td>
 									{% if active_customer.ranking.loan == True %}
 										{% if a.isLoan == False %}
-											<input type="number" name="loan_amount" placeholder="Amount to loan" step=".01" />
+											<input type="number" name="loan_amount" placeholder="Amount to loan ({{ a.currency }})" step=".01" />
 											<button formaction="{% url 'bank_app:request_loan' %}" class="simple_btn">
 												Request
 											</button>
@@ -234,7 +235,7 @@
 						<select name="card_pk">
 							<option disabled selected value> -- select an option -- </option>
 							{% for c in cards %}									
-								<option value="{{ c.pk }}">{{ c.cardNumber }}</option>
+								<option value="{{ c.pk }}">{{ c.cardNumber }} ({{ c.currency }})</option>
 							{% endfor %}
 						</select>
 					</div>
@@ -280,12 +281,12 @@
 								<td rowspan="2">{{ forloop.counter }}</td>
 								<td>{{ c.account }}</td>
 								<td>{{ c.cardNumber }}</td>
-								<td>{{ c.initialBalance }} DKK</td>
+								<td>{{ c.initialBalance|intcomma }} {{ c.currency }}</td>
 								<td>{{ c.expiryDate }}</td>
 								<td>
 									{% for b in card_repay_balances %}
 										{% if b.0 == c.pk %}
-											{{ b.1 }}
+											{{ b.1|intcomma }}
 										{% endif %}
 									{% endfor %}
 								</td>
@@ -305,7 +306,7 @@
 													<option disabled selected value> -- select an option -- </option>
 													{% for a in customer_accounts %}
 														{% if a.isLoan == False %}									
-															<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+															<option value="{{ a.pk }}">{{ a.accountNumber }} ({{ a.currency }})</option>
 														{% endif %}
 													{% endfor %}
 												</select>

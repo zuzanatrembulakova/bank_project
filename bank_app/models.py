@@ -1,4 +1,7 @@
 from datetime import datetime
+from email.policy import default
+from locale import currency
+from tkinter import CASCADE
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -10,6 +13,14 @@ class Ranking(models.Model):
     def __str__(self):
         return f"{self.rType} - {self.loan}"
 
+
+class Currency(models.Model):
+    type = models.CharField(max_length=200, default='DKK')
+
+    def __str__(self):
+        return f"{self.type}"
+
+
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone = models.IntegerField()
@@ -20,6 +31,7 @@ class Customer(models.Model):
 
 class Account(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, default=1)
     accountNumber = models.CharField(max_length=20)
     isLoan = models.BooleanField(default=False)
 
@@ -68,6 +80,7 @@ class AutomaticPayment(models.Model):
 class CreditCard(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, default=1)
     cardNumber = models.IntegerField()
     initialBalance = models.DecimalField(max_digits=30, decimal_places=2)
     expiryDate = models.DateField(editable=False)
