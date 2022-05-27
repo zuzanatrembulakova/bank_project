@@ -214,11 +214,11 @@ def set_transaction(request):
  
             aut_payment = AutomaticPayment()
             aut_payment.account = from_account
-            aut_payment.to_account = to_account
+            aut_payment.toAccount = to_account
             aut_payment.value = amount
             aut_payment.description = description
-            aut_payment.repeat_number = repeat_number
-            aut_payment.repeat_every = repeat_every
+            aut_payment.repeatNumber = repeat_number
+            aut_payment.repeatEvery = repeat_every
             aut_payment.save()
  
        
@@ -234,7 +234,7 @@ def set_transaction(request):
  
 def do_automatic_payment():
  
-    aut_payments = AutomaticPayment.objects.filter(repeat_number__gt = 0)
+    aut_payments = AutomaticPayment.objects.filter(repeatNumber__gt = 0)
  
     for ap in aut_payments.iterator():
        

@@ -63,7 +63,7 @@ class AutomaticPayment(models.Model):
     timestamp = models.DateTimeField(default=now, editable=False, help_text="time of last payment")
 
     def __str__(self):
-        return f"{self.account} - {self.to_account} - {self.value} - {self.repeat_number} - {self.timestamp}"
+        return f"{self.account} - {self.toAccount} - {self.value} - {self.repeatNumber} - {self.timestamp}"
 
 class CreditCard(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
