@@ -21,6 +21,15 @@ class Currency(models.Model):
         return f"{self.type}"
 
 
+class CurrencyRatio(models.Model):
+    fromCurrency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='fromCurrency')
+    toCurrency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    ratio = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.fromCurrency} - {self.toCurrency} - {self.ratio}"
+
+
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone = models.IntegerField()

@@ -204,10 +204,6 @@
                                 {% endfor %}
                             </td>  
                             <td>{{ c.interest|intcomma }}
-                                {% if c.interest != 0.00 %}
-                                    <input type="hidden" name="interest" value="{{ c.interest }}" />
-                                    <button formaction="{% url 'bank_app:pay_interest' %}" class="btn">Charge</button>
-                                {% endif %}
                             </td>
                             <td>
                                 <button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">

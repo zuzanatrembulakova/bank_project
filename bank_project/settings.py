@@ -37,6 +37,7 @@ STATICFILES_DIR = [
 CRONJOBS = [
         ('*/1 * * * *', 'bank_app.views.do_automatic_payment'),
         ('*/1 * * * *', 'bank_app.views.add_interest'),
+        ('*/5 * * * *', 'bank_app.views.charge_interest'),
 ]
 
 INSTALLED_APPS = [

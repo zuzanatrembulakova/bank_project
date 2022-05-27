@@ -591,7 +591,34 @@ def add_interest():
 
 
 @transaction.atomic
-def pay_interest(request):
+def charge_interest():
+
+    cards = CreditCard.objects.all
+
+    for c in cards.iterator():
+        
+        if c.interest > 0:
+            try:
+                with transaction.atomic():
+
+                    movement = AccountMovement()
+                    movement.account = c.acount
+                    movement.fromAccount = 'Bank'
+                    movement.value = -c.interest
+                    movement.description = 'Credit card interest'
+                    movement.save()
+                    
+                    c.interest = 0
+                    c.save()
+
+            except IntegrityError:
+                print('Transaction failed')
+
+    return
+
+
+@transaction.atomic
+def pay_interest2(request):
     pkcust = request.POST['pkcust']
     account_number = request.POST['to_account']
     card_number = request.POST['card_number']
