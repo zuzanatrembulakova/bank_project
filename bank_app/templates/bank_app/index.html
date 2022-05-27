@@ -138,7 +138,6 @@
 							<label>Repeat every</label>
 							<input type="number" name="repeat_every" value="1" min="1" max="59" />
 							<select name="repeat_time_unit">	
-								<!-- <option disabled selected value> -- select an option -- </option>						 -->
 								<option value="minute" selected>Minute</option>
 								<option value="hour">Hour</option>
 							</select>
@@ -242,14 +241,7 @@
 
 					<div class="form_item_wrapper">
 						<label>To account</label>
-						<select name="to_account">
-							<option disabled selected value> -- select an option -- </option>
-							{% for a in customer_accounts %}
-								{% if a.isLoan == False %}									
-									<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
-								{% endif %}
-							{% endfor %}
-						</select>
+						<input type="text" name="to_account" placeholder="Recipient's account number" />
 					</div>
 
 					<div class="form_item_wrapper">
@@ -271,7 +263,7 @@
 						<th></th>
 						<th>Account</th>
 						<th>Card Number</th>
-						<th>Initial balance</th>
+						<th>Card limit</th>
 						<th>Expiry Date</th>
 						<th>Debt</th>
 						<th></th>
@@ -285,9 +277,6 @@
 						<form method="post">
 							{% csrf_token %}
 								<input type="hidden" name="pk" value="{{ c.pk }}" />
-								<input type="hidden" name="card_number" value="{{ c.cardNumber }}" />
-								<input type="hidden" name="spent_amount" value="{{ c.spentAmount }}" />
-								<input type="hidden" name="balance" value="{{ c.initialBalance }}" />
 								<td rowspan="2">{{ forloop.counter }}</td>
 								<td>{{ c.account }}</td>
 								<td>{{ c.cardNumber }}</td>
@@ -300,58 +289,35 @@
 										{% endif %}
 									{% endfor %}
 								</td>
-								<!-- <td>
-									<div class="form_item_wrapper">
-										<label>To account</label>
-										<select name="to_account">
-											<option disabled selected value> -- select an option -- </option>
-											{% for a in customer_accounts %}									
-												<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
-											{% endfor %}
-										</select>
-									</div>
-									<div class="form_item_wrapper">
-										<input type="number" name="card_pay" placeholder="Amount to pay" step=".01"/>
-									</div>
-									<div class="form_item_wrapper">
-										<input type="text" name="card_desc" placeholder="Text for payment" />
-									</div>
-									<div class="form_item_wrapper">
-										<button formaction="{% url 'bank_app:pay_card' %}" class="btn">
-											Pay
-										</button>
-									</div>
-								</td> -->
 								<td rowspan="2">
 									<button formaction="{% url 'bank_app:show_card_movements' %}" class="btn">Card movements</button>
 								</td>
 					</tr>
 					<tr>
-								<td colspan="5">
-									{% if c.spentAmount != 0 %}
-								
-										<div class="form_item_wrapper">
-											<label>From account</label>
-											<select name="from_account">
-												<option disabled selected value> -- select an option -- </option>
-												{% for a in customer_accounts %}
-													{% if a.isLoan == False %}									
-														<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
-													{% endif %}
-												{% endfor %}
-											</select>
-										</div>
-										<div class="form_item_wrapper">
-											<input type="number" name="card_repay" placeholder="Amount to repay" step=".01"/>
-										</div>
-										<div class="form_item_wrapper">
-											<button formaction="{% url 'bank_app:repay_card' %}" class="btn">
-												Repay
-											</button>
-										</div>
-								
-									{% endif %}
-								</td>
+						<td colspan="5" id="repay">
+							{% if c.spentAmount != 0 %}
+								<div>
+									<div class="form_item_wrapper">
+										<label>From account</label>
+										<select name="from_account">
+											<option disabled selected value> -- select an option -- </option>
+											{% for a in customer_accounts %}
+												{% if a.isLoan == False %}									
+													<option value="{{ a.pk }}">{{ a.accountNumber }}</option>
+												{% endif %}
+											{% endfor %}
+										</select>
+									</div>
+									<div class="form_item_wrapper">
+										<input type="number" name="card_repay" placeholder="Amount to repay" step=".01"/>
+									</div>
+									<div class="form_item_wrapper">
+										<button formaction="{% url 'bank_app:pay_debt' %}" class="btn">Pay debt</button>
+									</div>
+							</div>
+						
+							{% endif %}
+						</td>
 						</form>
 					</tr>
 					{% endfor %}
@@ -362,7 +328,7 @@
 
 	{% else %}
 
-		<h2>Please log in</h2>
+		<h2 id="pls_login">Please log in</h2>
 
 	{% endif %}
 

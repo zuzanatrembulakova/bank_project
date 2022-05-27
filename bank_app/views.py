@@ -44,14 +44,11 @@ def show_index(request, message = '', is_error = False):
             for a in customer_accounts.iterator():
                 balance = round(get_balance_for_account(a), 2)
                 balances.append( (a.pk, f'{balance:,}') )
-            print(customer_accounts)
-            print(cards)
+            
             card_repay_balances = []
             for c in cards.iterator():
-                print('2')
                 card_repay_balance = round(get_repay_amount_for_card(c), 2)
                 card_repay_balances.append( (c.pk, f'{card_repay_balance:,}') )
-            print('3')
            
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
@@ -454,7 +451,6 @@ def generate_card(request):
         card.spentAmount = spent_amount
         card.expiryDate = expiry_date
         card.cvvNumber = cvv
-        card.interest = 0
         card.save()
  
         card_movement = CardMovement()
@@ -478,29 +474,29 @@ def del_card(request):
    
  
 @transaction.atomic
-def repay_card(request):
+def pay_debt(request):
     message = 'Success'
     is_error = False
  
     if request.method == "POST":
         pk = request.POST['pk']
- 
+        card = CreditCard.objects.get(pk=pk)
+
         from_accountpk = request.POST['from_account']
         from_account = Account.objects.get(pk = from_accountpk)
-        print(from_account)
- 
-        to_card = request.POST['card_number']
-        dest_card = CreditCard.objects.get(cardNumber = to_card)
-        print(dest_card)
        
-        amount = int(request.POST['card_repay'])
-        remaining_amount = int(request.POST['spent_amount'])
-        balance = int(request.POST['balance'])
+        amount = float(request.POST['card_repay'])
+        remaining_amount = float(get_repay_amount_for_card(card))
+
+        initial_balance = card.initialBalance
+
         from_balance = get_balance_for_account(from_account)
-        to_balance = get_repay_amount_for_card(dest_card)
- 
-        if amount <= 0 or amount > abs(to_balance):
+
+        if amount > initial_balance or amount <= 0 or amount > remaining_amount:
             print('The amount you entered is not valid or exceeds the debt')
+ 
+        # if amount <= 0 or amount > abs(to_balance):
+        #     print('The amount you entered is not valid or exceeds the debt')
        
         elif from_balance > amount:
  
@@ -508,21 +504,20 @@ def repay_card(request):
                 with transaction.atomic():
                     movement_from = AccountMovement()
                     movement_from.account = from_account
-                    movement_from.fromAccount = f"{to_card} (credit card)"
+                    movement_from.fromAccount = f"{card.cardNumber} (credit card)"
                     movement_from.value = -amount
                     movement_from.description = 'Credit card repay'
                     movement_from.save()
  
                     movement_to = CardMovement()
-                    movement_to.card = dest_card
+                    movement_to.card = card
                     movement_to.toFrom = from_account
                     movement_to.value = amount
                     movement_to.description = 'Credit card repay'
                     movement_to.save()
  
-                    dest_card.initialBalance = balance + amount
-                    dest_card.spentAmount = remaining_amount + amount
-                    dest_card.save()
+                    card.spentAmount = remaining_amount + amount
+                    card.save()
  
             except IntegrityError:
                 message = 'Transaction  failed'
@@ -544,27 +539,27 @@ def pay_card(request):
         from_cardpk = request.POST['card_pk']
         from_card = CreditCard.objects.get(pk=from_cardpk)
 
-        to_accountpk = request.POST['to_account']
-        to_account = Account.objects.get(pk=to_accountpk)
+        to_account = request.POST['to_account']
+        dest_account = Account.objects.get(accountNumber = to_account)
 
-        balance = float(request.POST['balance'])
+        balance = from_card.initialBalance
         amount = float(request.POST['card_pay'])
         description = request.POST['card_desc']
 
-        remaining_amount = float(request.POST['spent_amount'])
+        remaining_amount = float(get_repay_amount_for_card(from_card))
  
         if balance > amount:
             try:
                 with transaction.atomic():
                     movement_from = CardMovement()
                     movement_from.card = from_card
-                    movement_from.toFrom = to_account
+                    movement_from.toFrom = dest_account
                     movement_from.value = -amount
                     movement_from.description = description
                     movement_from.save()
  
                     movement_from = AccountMovement()
-                    movement_from.account = to_account
+                    movement_from.account = dest_account
                     movement_from.fromAccount = f"{from_cardpk} (credit card)"
                     movement_from.value = amount
                     movement_from.description = description

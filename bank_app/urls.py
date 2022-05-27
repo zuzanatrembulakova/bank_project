@@ -22,12 +22,11 @@ urlpatterns = [
         path('request_loan/', views.request_loan, name='request_loan'),
         path('decline_loan/', views.decline_loan, name='decline_loan'),
         path('accept_loan/', views.accept_loan, name='accept_loan'),
-        # path('pay_loan/', views.pay_loan, name='pay_loan'),
         path('del_loan/', views.del_loan, name='del_loan'),
 
         path('generate_card/', views.generate_card, name='generate_card'),
         path('del_card/', views.del_card, name='del_card'),
-        path('repay_card/', views.repay_card, name='repay_card'),
+        path('pay_debt/', views.pay_debt, name='pay_debt'),
         path('pay_card/', views.pay_card, name='pay_card'),
         path('show_card_movements/', views.show_card_movements, name='show_card_movements'),
 ]

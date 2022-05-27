@@ -21,6 +21,13 @@ body {
     display: block;
 }
 
+#pls_login{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .btn {
     cursor: pointer;
     padding: .4rem;
@@ -253,6 +260,21 @@ td{
 }
 .white_bg{
     background: #ffffff;
+}
+
+#repay{
+    text-align: left;
+}
+#repay > div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#repay .form_item_wrapper{
+    margin: 1rem;
+}
+#repay .form_item_wrapper:not(:last-child){
+    width: 35%;
 }
 
 #account_overview > table .simple_btn{

@@ -167,9 +167,7 @@
                     <th>Balance</th>
                     <th>Expiry Date</th>
                     <th>Debt</th>
-                    <th>Interest</th>
                     <th></th>
-                    <!-- <th>CVV</th> -->
                 </tr>
 
                 {% for c in cards %}
@@ -195,10 +193,6 @@
                                     {% endif %}
                                 {% endfor %}
                             </td>
-                            <td>{{ c.interest }}</td>
-                            <!-- <td>
-                            </td> -->
-                            <!-- <td>{{ c.cvvNumber }}</td> -->
                             <td>
                                 <button formaction="{% url 'bank_app:del_card' %}" class="icon_btn del_btn">
                                     <i class="fa-solid fa-trash"></i>
