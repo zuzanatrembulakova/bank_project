@@ -239,13 +239,13 @@ def do_automatic_payment():
     for ap in aut_payments.iterator():
        
         tz=pytz.timezone("utc")
-        time = ap.timestamp + timedelta(minutes=ap.repeat_every)
+        time = ap.timestamp + timedelta(minutes=ap.repeatEvery)
  
         if time < datetime.now(tz):
            
-            if transfer_money(ap.account, ap.value, ap.description, ap.to_account) == None:
+            if transfer_money(ap.account, ap.value, ap.description, ap.toAccount) == None:
                 ap.timestamp = datetime.now(tz)
-                ap.repeat_number = ap.repeat_number - 1
+                ap.repeatNumber = ap.repeatNumber - 1
                 ap.save()
     return
  

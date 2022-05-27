@@ -21,7 +21,6 @@ class Customer(models.Model):
 class Account(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     accountNumber = models.CharField(max_length=20)
-    # accountNumber = models.CharField(max_length=3)
     isLoan = models.BooleanField(default=False)
 
     def __str__(self):
@@ -56,11 +55,11 @@ class LoanRequest(models.Model):
 
 class AutomaticPayment(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    to_account = models.CharField(max_length=250, default='undefined')
+    toAccount = models.CharField(max_length=250, default='undefined')
     value = models.DecimalField(max_digits=30, decimal_places=2)
     description = models.TextField()
-    repeat_number = models.IntegerField(help_text="number of payment repeats")
-    repeat_every = models.IntegerField(help_text="how often should we repeat payment (in minutes)")
+    repeatNumber = models.IntegerField(help_text="number of payment repeats")
+    repeatEvery = models.IntegerField(help_text="how often should we repeat payment (in minutes)")
     timestamp = models.DateTimeField(default=now, editable=False, help_text="time of last payment")
 
     def __str__(self):
