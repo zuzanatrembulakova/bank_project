@@ -143,7 +143,7 @@ def show_accounts(request, pkcust):
  
     return render(request, 'bank_app/accounts.html', context)
  
- 
+@transaction.atomic
 def add_account(request):
     pkcust = request.POST['pk']
  
@@ -153,20 +153,25 @@ def add_account(request):
  
     customer = get_object_or_404(Customer, pk=pkcust)
     currency = Currency.objects.get(pk=currencypk)
- 
-    account = Account()
-    account.customer = customer
-    account.currency = currency
-    account.accountNumber = account_number
-    account.save()
- 
-    account_movement = AccountMovement()
-    account_movement.account = account
-    account_movement.fromAccount = 'Bank'
-    account_movement.value = balance
-    account_movement.description = "Initial balance"
-    account_movement.save()
- 
+
+    try:
+        with transaction.atomic(): 
+            account = Account()
+            account.customer = customer
+            account.currency = currency
+            account.accountNumber = account_number
+            account.save()
+
+            account_movement = AccountMovement()
+            account_movement.account = account
+            account_movement.fromAccount = 'Bank'
+            account_movement.value = balance
+            account_movement.description = "Initial balance"
+            account_movement.save()
+
+    except IntegrityError:
+        print('Transaction failed')
+
     return show_accounts(request, pkcust)
  
  
@@ -284,6 +289,7 @@ def transfer_money(from_account, amount, description, to_account):
         data = {
                 "to_account": to_account,
                 "from_account": from_account_number,
+                "from_currency": from_account.currency,
                 "amount": amount,
                 "description": description,
                 }
@@ -312,7 +318,9 @@ def transfer_money(from_account, amount, description, to_account):
 
         if from_currency != dest_currency:
             currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=dest_currency)
-            amount = amount*currency_ratio
+            converted_amount = amount * float(currency_ratio.ratio)
+        else:
+            converted_amount = amount
 
         try:
             with transaction.atomic():
@@ -326,7 +334,7 @@ def transfer_money(from_account, amount, description, to_account):
                 movement_to = AccountMovement()
                 movement_to.account = dest_account
                 movement_to.fromAccount = from_account
-                movement_to.value = amount
+                movement_to.value = converted_amount
                 movement_to.description = description
                 movement_to.save()
  
@@ -338,36 +346,45 @@ def transfer_money(from_account, amount, description, to_account):
     return None if is_error == False else message
  
  
+@transaction.atomic
 def request_loan(request):
     pk = request.POST['pk']
 
     amount = float(request.POST['loan_amount'])
-    to_account = request.POST['to_account']
+    to_account_number = request.POST['to_account']
+    to_account = Account.objects.get(accountNumber=to_account)
 
     number = random.randint(10000,99999)
-    loan_account = f"LOAN_{to_account}{number}"
+    loan_account = f"LOAN_{to_account_number}{number}"
 
     customer = Customer.objects.get(user = request.user)
 
-    account = Account()
-    account.customer = customer
-    account.accountNumber = loan_account
-    account.isLoan = True
-    account.save()
+    try:
+        with transaction.atomic():
+            account = Account()
+            account.customer = customer
+            account.currency = to_account.currency
+            account.accountNumber = loan_account
+            account.isLoan = True
+            account.save()
 
-    account_movement = AccountMovement()
-    account_movement.account = account
-    account_movement.fromAccount = 'Bank'
-    account_movement.value = -amount
-    account_movement.description = "Loan"
-    account_movement.save()
+            # Create negative movement (debt) on loan account
+            account_movement = AccountMovement()
+            account_movement.account = account
+            account_movement.fromAccount = 'Bank'
+            account_movement.value = -amount
+            account_movement.description = "Loan"
+            account_movement.save()
 
-    loan = LoanRequest()
-    loan.customer = customer
-    loan.account = Account.objects.get(pk=pk)
-    loan.loanAccount = Account.objects.get(accountNumber=loan_account)
-    loan.loanAmount = amount
-    loan.save()
+            loan = LoanRequest()
+            loan.customer = customer
+            loan.account = Account.objects.get(pk=pk)
+            loan.loanAccount = Account.objects.get(accountNumber=loan_account)
+            loan.loanAmount = amount
+            loan.save()
+
+    except IntegrityError:
+            print('Transaction failed')
  
     return HttpResponseRedirect(reverse('bank_app:index'))
  
@@ -388,7 +405,10 @@ def accept_loan(request):
         loan_account = loan.loanAccount
  
         try:
-            with transaction.atomic():          
+            with transaction.atomic():   
+                # Loan is confirmed
+                # New positive account movmenet on account that requested loan
+
                 movement_to = AccountMovement()
                 movement_to.account = dest_account[0]
                 movement_to.fromAccount = 'Bank'
@@ -441,7 +461,6 @@ def generate_card(request):
  
     customer = get_object_or_404(Customer, pk=pkcust)
     account = get_object_or_404(Account, pk=accountpk)
-    currency = account.currency
 
     card_number = random.randint(1000000000000000,9999999999999999)
     cvv = random.randint(100,999)
@@ -459,7 +478,6 @@ def generate_card(request):
         card = CreditCard()
         card.customer = customer
         card.account = account
-        card.currency = currency
         card.cardNumber = card_number
         card.initialBalance = card_balance
         card.expiryDate = expiry_date
@@ -494,9 +512,11 @@ def pay_debt(request):
     if request.method == "POST":
         pk = request.POST['pk']
         card = CreditCard.objects.get(pk=pk)
+        dest_currency = card.account.currency
 
         from_accountpk = request.POST['from_account']
         from_account = Account.objects.get(pk=from_accountpk)
+        from_currency = from_account.currency
        
         amount = float(request.POST['card_repay'])
         remaining_amount = float(get_repay_amount_for_card(card))
@@ -507,6 +527,12 @@ def pay_debt(request):
             print('The amount you entered is not valid or exceeds the debt')
        
         elif from_balance > amount:
+
+            if from_currency != dest_currency:
+                currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=dest_currency)
+                converted_amount = amount * float(currency_ratio.ratio)
+            else:
+                converted_amount = amount
  
             try:
                 with transaction.atomic():
@@ -520,7 +546,7 @@ def pay_debt(request):
                     movement_to = CardMovement()
                     movement_to.card = card
                     movement_to.toFrom = from_account
-                    movement_to.value = amount
+                    movement_to.value = converted_amount
                     movement_to.description = 'Credit card repay'
                     movement_to.save()
  
@@ -545,13 +571,20 @@ def pay_card(request):
         from_card = CreditCard.objects.get(pk=from_cardpk)
 
         to_account = request.POST['to_account']
-        dest_account = Account.objects.get(accountNumber = to_account)
+        dest_account = Account.objects.get(accountNumber=to_account)
 
         balance = from_card.initialBalance
         amount = float(request.POST['card_pay'])
         description = request.POST['card_desc']
  
         if balance > amount:
+
+            if from_card.account.currency != dest_account.currency:
+                currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_card.account.currency, toCurrency=dest_account.currency)
+                converted_amount = amount * float(currency_ratio.ratio)
+            else:
+                converted_amount = amount
+
             try:
                 with transaction.atomic():
                     movement_from = CardMovement()
@@ -564,7 +597,7 @@ def pay_card(request):
                     movement_from = AccountMovement()
                     movement_from.account = dest_account
                     movement_from.fromAccount = f"{from_card.cardNumber} (credit card)"
-                    movement_from.value = amount
+                    movement_from.value = converted_amount
                     movement_from.description = description
                     movement_from.save()
  
@@ -597,7 +630,6 @@ def add_interest():
 
 @transaction.atomic
 def charge_interest():
-    print('hhhh')
     cards = CreditCard.objects.all()
 
     for c in cards.iterator():
@@ -620,35 +652,6 @@ def charge_interest():
                 print('Transaction failed')
 
     return
-
-
-@transaction.atomic
-def pay_interest2(request):
-    pkcust = request.POST['pkcust']
-    account_number = request.POST['to_account']
-    card_number = request.POST['card_number']
-    interest = float(request.POST['interest'])
-
-    account = Account.objects.get(accountNumber=account_number)
-    card = CreditCard.objects.get(cardNumber=card_number)
-
-    try:
-        with transaction.atomic():
-
-            movement = AccountMovement()
-            movement.account = account
-            movement.fromAccount = 'Bank'
-            movement.value = -interest
-            movement.description = 'Credit card interest'
-            movement.save()
-            
-            card.interest = 0
-            card.save()
-
-    except IntegrityError:
-        print('Transaction failed')
-
-    return show_accounts(request, pkcust)
 
   
 def show_card_movements(request):

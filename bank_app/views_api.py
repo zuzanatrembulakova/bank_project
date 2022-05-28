@@ -1,23 +1,24 @@
-from email import message
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from django.shortcuts import get_object_or_404
-from .models import Account, AccountMovement
+from .models import Account, AccountMovement, CurrencyRatio, Currency
 
 class ExternalTransaction(APIView):
     def post(self, request, *args, **kwargs):
         
         to_account = request.data.get('to_account')
         from_account = request.data.get('from_account')
+        from_currency_type = request.data.get('from_currency')
         amount = request.data.get('amount')
         description = request.data.get('description')
 
         bank_code = to_account[0:4]
         print(bank_code)
 
-        account = Account.objects.filter(accountNumber = to_account)
+        account = Account.objects.get(accountNumber = to_account)
+        from_currency = Currency.objects.get(type=from_currency_type)
 
         if not account:
             print('Account doesnt exist')
@@ -26,8 +27,12 @@ class ExternalTransaction(APIView):
     
         else:
 
+            if from_currency != account.currency:
+                currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=account.currency)
+                amount = float(amount) * float(currency_ratio.ratio)
+
             account_movement = AccountMovement()
-            account_movement.account = account[0]
+            account_movement.account = account
             account_movement.fromAccount = from_account
             account_movement.value = amount
             account_movement.description = description

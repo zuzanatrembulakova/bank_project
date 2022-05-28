@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,7 +37,7 @@
 					<tr>
 						<th></th>
 						<th>Date</th>
-						<th>Amount (DKK)</th>
+						<th>Amount ({{ card.account.currency.type }})</th>
 						<th>To/from</th>
 						<th>Description</th>
 					</tr>
@@ -45,11 +46,11 @@
                             <th>{{ forloop.counter }}</th>
                             <th>{{ cm.timestamp }}</th>
                             {% if cm.value > 0 %}
-                                <th class="green_text">+{{ cm.value }}</th>
+                                <th class="green_text">+{{ cm.value|intcomma }}</th>
 							{% elif cm.value == 0 %}
-								<th>{{ cm.value }}</th>
+								<th>{{ cm.value|intcomma }}</th>
                             {% else %}
-								<th class="red_text">{{ cm.value }}</th>
+								<th class="red_text">{{ cm.value|intcomma }}</th>
                             {% endif %}
 							<th>{{ cm.toFrom }}</th>
                             <th>{{ cm.description }}</th>

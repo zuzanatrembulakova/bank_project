@@ -85,7 +85,6 @@ class AutomaticPayment(models.Model):
 class CreditCard(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, default=1)
     cardNumber = models.IntegerField()
     initialBalance = models.DecimalField(max_digits=30, decimal_places=2)
     expiryDate = models.DateField(editable=False)

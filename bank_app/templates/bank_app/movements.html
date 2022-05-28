@@ -44,7 +44,7 @@
                    {% for am in account_movements %}
 				   		<tr>
                             <th>{{ forloop.counter }}</th>
-                            <th>{{ am.timestamp|naturalday }}</th>
+                            <th>{{ am.timestamp }}</th>
                             {% if am.value > 0 %}
                                 <th class="green_text">+{{ am.value|intcomma }}</th>
 							{% elif am.value == 0 %}
