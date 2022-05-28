@@ -164,7 +164,9 @@ header p{
 #create_credit_card h3, 
 #create_credit_card .btn,
 #card_payments h3,
-#card_payments .btn {
+#card_payments .btn,
+#currency_rate h3,
+#currency_rate .btn {
     margin-left: 2rem;
 }
 

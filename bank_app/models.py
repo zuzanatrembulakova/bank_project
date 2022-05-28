@@ -12,6 +12,7 @@ class Ranking(models.Model):
 
 class Currency(models.Model):
     type = models.CharField(max_length=200, default='DKK')
+    name = models.CharField(max_length=200, default='Danish Krone')
 
     def __str__(self):
         return f"{self.type}"

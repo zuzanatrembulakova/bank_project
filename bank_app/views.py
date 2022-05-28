@@ -5,12 +5,11 @@ from datetime import date, datetime, timedelta
 from django.contrib.auth.models import User
  
 import pytz
-import requests
+import requests 
+import random
 from .views_common import *
 from .models import *
- 
-import random
- 
+
  
 def index(request):
     return show_index(request)
@@ -23,11 +22,13 @@ def show_index(request, message = '', is_error = False):
  
         rankings = Ranking.objects.all()
         currencies = Currency.objects.all()
+        currency_ratios = CurrencyRatio.objects.all()
  
         context = {
             'usertype': get_user_type(request.user),
             'rankings': rankings,
             'currencies': currencies,
+            'currency_ratios': currency_ratios,
             'message': message,
             'is_error': is_error,
         }
@@ -99,7 +100,7 @@ def update_ranking(request):
     customer.save()
  
     return HttpResponseRedirect(reverse('bank_app:index'))
- 
+
  
 def accounts(request):
     if request.method == "POST":
@@ -143,6 +144,7 @@ def show_accounts(request, pkcust):
  
     return render(request, 'bank_app/accounts.html', context)
  
+
 @transaction.atomic
 def add_account(request):
     pkcust = request.POST['pk']
@@ -192,7 +194,7 @@ def show_movements(request):
  
     account = get_object_or_404(Account, pk=pk)
     balance = get_balance_for_account(account)
-    account_movements = AccountMovement.objects.filter(account=account)
+    account_movements = AccountMovement.objects.filter(account=account).order_by('-timestamp')
  
     context = {
             'usertype': get_user_type(request.user),
@@ -321,26 +323,30 @@ def transfer_money(from_account, amount, description, to_account):
             converted_amount = amount * float(currency_ratio.ratio)
         else:
             converted_amount = amount
+        print(converted_amount)
+        print(get_balance_for_account(dest_account))
+        if dest_account.isLoan == True and converted_amount > abs(get_balance_for_account(dest_account)):
+            message = "The amount you entered is not valid or exceeds the debt"
+        else:
+            try:
+                with transaction.atomic():
+                    movement_from = AccountMovement()
+                    movement_from.account = from_account
+                    movement_from.fromAccount = dest_account
+                    movement_from.value = -amount
+                    movement_from.description = description
+                    movement_from.save()
 
-        try:
-            with transaction.atomic():
-                movement_from = AccountMovement()
-                movement_from.account = from_account
-                movement_from.fromAccount = dest_account
-                movement_from.value = -amount
-                movement_from.description = description
-                movement_from.save()
- 
-                movement_to = AccountMovement()
-                movement_to.account = dest_account
-                movement_to.fromAccount = from_account
-                movement_to.value = converted_amount
-                movement_to.description = description
-                movement_to.save()
- 
-        except IntegrityError:
-            is_error = True
-            message = 'Transaction failed'
+                    movement_to = AccountMovement()
+                    movement_to.account = dest_account
+                    movement_to.fromAccount = from_account
+                    movement_to.value = converted_amount
+                    movement_to.description = description
+                    movement_to.save()
+
+            except IntegrityError:
+                is_error = True
+                message = 'Transaction failed'
    
     print('Transfer money result: ', message, is_error)
     return None if is_error == False else message
@@ -352,7 +358,7 @@ def request_loan(request):
 
     amount = float(request.POST['loan_amount'])
     to_account_number = request.POST['to_account']
-    to_account = Account.objects.get(accountNumber=to_account)
+    to_account = Account.objects.get(accountNumber=to_account_number)
 
     number = random.randint(10000,99999)
     loan_account = f"LOAN_{to_account_number}{number}"
@@ -523,16 +529,16 @@ def pay_debt(request):
 
         from_balance = get_balance_for_account(from_account)
 
-        if amount <= 0 or amount > abs(remaining_amount):
+        if from_currency != dest_currency:
+            currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=dest_currency)
+            converted_amount = amount * float(currency_ratio.ratio)
+        else:
+            converted_amount = amount
+
+        if amount <= 0 or converted_amount > abs(remaining_amount):
             print('The amount you entered is not valid or exceeds the debt')
        
         elif from_balance > amount:
-
-            if from_currency != dest_currency:
-                currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=dest_currency)
-                converted_amount = amount * float(currency_ratio.ratio)
-            else:
-                converted_amount = amount
  
             try:
                 with transaction.atomic():
@@ -661,7 +667,7 @@ def show_card_movements(request):
  
     card = get_object_or_404(CreditCard, pk=pk)
     card_repay_balance = get_repay_amount_for_card(card)
-    card_movements = CardMovement.objects.filter(card=card)
+    card_movements = CardMovement.objects.filter(card=card).order_by('-timestamp')
  
     context = {
             'usertype': get_user_type(request.user),

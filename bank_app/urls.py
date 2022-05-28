@@ -18,6 +18,7 @@ urlpatterns = [
         path('set_transaction/', views.set_transaction, name='set_transaction'),
 
         path('api/external_transaction/', views_api.ExternalTransaction.as_view()),
+        path('api/currency_ratio/<str:c1>/<str:c2>', views_api.CurrencyRatioView.as_view()),
 
         path('request_loan/', views.request_loan, name='request_loan'),
         path('decline_loan/', views.decline_loan, name='decline_loan'),

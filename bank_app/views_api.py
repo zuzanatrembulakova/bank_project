@@ -1,3 +1,5 @@
+from locale import currency
+from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -45,3 +47,45 @@ class ExternalTransaction(APIView):
                     {"res": res },
                     status=rec_code
                 )
+
+class CurrencyRatioView(APIView):
+    def get(self, request, c1, c2, *args, **kwargs):
+
+        try:
+            from_currency = Currency.objects.get(type=c1)
+            to_currency = Currency.objects.get(type=c2)
+
+            currency = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=to_currency)
+            
+            return Response(
+                        {"res": currency.ratio },
+                        status=status.HTTP_200_OK
+                    )
+
+        except Exception:
+            return Response(
+                            {"res": "Not found" },
+                            status=status.HTTP_404_NOT_FOUND
+                        )
+
+    def put(self, request, c1, c2, *args, **kwargs):
+
+        try:
+            from_currency = Currency.objects.get(type=c1)
+            to_currency = Currency.objects.get(type=c2)
+
+            currency = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=to_currency)
+            
+            currency.ratio = request.data.get('ratio')
+            currency.save()
+
+            return Response(
+                        {"res": 'OK' },
+                        status=status.HTTP_200_OK
+                    )
+
+        except Exception:
+            return Response(
+                            {"res": "Not found" },
+                            status=status.HTTP_404_NOT_FOUND
+                        )
