@@ -60,16 +60,15 @@ function curenncyChange(){
                 },
             })
             .then(response => {
-                if (response.status == 200){
-    
-                    response.json().then(data => ({
-                        data: data,
-                    })).then(res => {
-                        one("#rate").value = res.data.res
-                    })
-    
-                } else {
-                    return null;
+                if (response.status != 200){
+                    alert("SERVER ERROR");
+                    return JSON.stringify("");
+                }
+                return response.json() //Convert response to JSON
+            })
+            .then(data => {
+                if (data['res']){
+                    one("#rate").value = data.res
                 }
             })
         } else {
@@ -77,7 +76,6 @@ function curenncyChange(){
         }        
     }     
 }
-
 
 function updateRate(){
     let c1 = one("#from_currency").value

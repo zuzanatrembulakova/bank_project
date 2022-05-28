@@ -44,7 +44,7 @@ class ExternalTransaction(APIView):
             rec_code = status.HTTP_200_OK
         
         return Response(
-                    {"res": res },
+                    {"res": res},
                     status=rec_code
                 )
 

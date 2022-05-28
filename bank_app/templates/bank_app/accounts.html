@@ -18,7 +18,14 @@
     {% if request.user.is_authenticated %}
 
 	<header>
-		<h1>Bank app</h1>
+		<div>
+			<h1>Bank app</h1>
+			{% if is_error == True and message != '' %}
+				<p class="red_text">{{ message }}</p>
+			{% elif is_error == False and messsage != '' %}				
+				<p class="green_text">{{ message }}</p>
+			{% endif %}
+        </div>
 		<section>
 			<div>
 				<h2>Welcome, {{ request.user.username }}!</h2>
@@ -42,7 +49,7 @@
                 </div>
                 <div class="form_item_wrapper">
                     <label>Initial Balance</label>
-                    <input type="number" name="balance" placeholder="Set Initial Balance (DKK)" step=".01"/>
+                    <input type="number" name="balance" placeholder="Set Initial Balance" step=".01"/>
                 </div>
                 <div class="form_item_wrapper">
                     <label>Account currency</label>
@@ -97,7 +104,7 @@
                                         {% if l.confirmed == 'true' %}
                                             {% for b in balances %}
                                                 {% if b.0 == a.pk %}
-                                                    {% if b.1 == '0.00' %}
+                                                    {% if b.1 == 0.00 %}
                                                         <td>
                                                             <button formaction="{% url 'bank_app:del_loan' %}" class="icon_btn del_btn">
                                                                 <i class="fa-solid fa-trash"></i>
@@ -194,7 +201,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ c.account }}</td>
                             <td>{{ c.cardNumber }}</td>
-                            <td>{{ c.initialBalance|intcomma }} {{ c.currency }}</td>
+                            <td>{{ c.initialBalance|intcomma }} {{ c.account.currency.type }}</td>
                             <td>{{ c.expiryDate }}</td>
                             <td>
                                 {% for b in card_repay_balances %}

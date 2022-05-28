@@ -125,7 +125,24 @@ header > section{
     align-items: center;
     justify-content: space-between;
 }
-header p{
+
+header > div{
+    position: relative;
+}
+
+header > div > p{
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+}
+
+header > div .green_text, header > div .red_text{
+    font-weight: bold;
+    font-size: 20px;
+}
+
+header > section p{
     font-size: 14px;
     padding: .5rem 0;
 }

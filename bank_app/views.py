@@ -1,3 +1,4 @@
+from email import message
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError, transaction
@@ -5,7 +6,7 @@ from datetime import date, datetime, timedelta
 from django.contrib.auth.models import User
  
 import pytz
-import requests 
+import requests
 import random
 from .views_common import *
 from .models import *
@@ -77,8 +78,10 @@ def create_customer(request):
             customer.phone = phone
             customer.user = user
             customer.save()
+
+            message = 'Customer created'
  
-    return HttpResponseRedirect(reverse('bank_app:index'))
+    return show_index(request, message)
  
  
 def del_customer(request):
@@ -87,8 +90,10 @@ def del_customer(request):
     customer = get_object_or_404(Customer, pk=pk)
     User.objects.get(pk=customer.user.pk).delete()
     customer.delete()
+
+    message = 'Customer deleted'
  
-    return HttpResponseRedirect(reverse('bank_app:index'))
+    return show_index(request, message)
  
  
 def update_ranking(request):
@@ -98,8 +103,10 @@ def update_ranking(request):
     customer = get_object_or_404(Customer, pk=pk)
     customer.ranking = Ranking.objects.get(pk=selection)
     customer.save()
+
+    message = 'Customer ranking updated'
  
-    return HttpResponseRedirect(reverse('bank_app:index'))
+    return show_index(request, message)
 
  
 def accounts(request):
@@ -109,7 +116,7 @@ def accounts(request):
     return show_accounts(request, pkcust)
  
  
-def show_accounts(request, pkcust):
+def show_accounts(request, pkcust, message = '', is_error = False):
     context = {}
  
     if request.user.is_authenticated and get_user_type(request.user) == "BANKER":
@@ -140,6 +147,8 @@ def show_accounts(request, pkcust):
                 'card_repay_balances': card_repay_balances,
                 'loans': loans,
                 'cards': cards,
+                'message': message,
+                'is_error': is_error,
         }
  
     return render(request, 'bank_app/accounts.html', context)
@@ -156,25 +165,37 @@ def add_account(request):
     customer = get_object_or_404(Customer, pk=pkcust)
     currency = Currency.objects.get(pk=currencypk)
 
-    try:
-        with transaction.atomic(): 
-            account = Account()
-            account.customer = customer
-            account.currency = currency
-            account.accountNumber = account_number
-            account.save()
+    try: 
+        Account.objects.get(accountNumber=account_number)
+        message = "Account number is already in use"
+        is_error = True
+    except Exception:
+        is_error = False
 
-            account_movement = AccountMovement()
-            account_movement.account = account
-            account_movement.fromAccount = 'Bank'
-            account_movement.value = balance
-            account_movement.description = "Initial balance"
-            account_movement.save()
+    if is_error == False:
+        try:
+            with transaction.atomic(): 
+                account = Account()
+                account.customer = customer
+                account.currency = currency
+                account.accountNumber = account_number
+                account.save()
 
-    except IntegrityError:
-        print('Transaction failed')
+                account_movement = AccountMovement()
+                account_movement.account = account
+                account_movement.fromAccount = 'Bank'
+                account_movement.value = balance
+                account_movement.description = "Initial balance"
+                account_movement.save()
 
-    return show_accounts(request, pkcust)
+                message = 'Account created successfully'
+                is_error = False
+
+        except IntegrityError:
+            message = 'Transaction failed'
+            is_error = True
+
+    return show_accounts(request, pkcust, message, is_error)
  
  
 def del_account(request):
@@ -183,8 +204,9 @@ def del_account(request):
  
     account = get_object_or_404(Account, pk=pk)
     account.delete()
+    message = 'Account deleted successfully'
  
-    return show_accounts(request, pkcust)
+    return show_accounts(request, pkcust, message)
  
  
 def show_movements(request):
@@ -235,15 +257,21 @@ def set_transaction(request):
             aut_payment.repeatNumber = repeat_number
             aut_payment.repeatEvery = repeat_every
             aut_payment.save()
+
+            message = 'Automatic payment set successfully'
+            is_error = False
       
         transaction_result = transfer_money(from_account, amount, description, to_account)
  
         if transaction_result == None:
-            message = ''
+            message = 'Transaction successful'
+            is_error = False
         else:
+            message = transaction_result
+            is_error = True
             print('****', transaction_result)
            
-    return show_index(request, message)
+    return show_index(request, message, is_error)
 
  
 def do_automatic_payment():
@@ -266,7 +294,7 @@ def do_automatic_payment():
  
 @transaction.atomic
 def transfer_money(from_account, amount, description, to_account):
-    message = 'Success'
+    message = 'Transaction successfull'
     is_error = False
 
     from_account_number = from_account.accountNumber
@@ -323,8 +351,7 @@ def transfer_money(from_account, amount, description, to_account):
             converted_amount = amount * float(currency_ratio.ratio)
         else:
             converted_amount = amount
-        print(converted_amount)
-        print(get_balance_for_account(dest_account))
+
         if dest_account.isLoan == True and converted_amount > abs(get_balance_for_account(dest_account)):
             message = "The amount you entered is not valid or exceeds the debt"
         else:
@@ -389,10 +416,14 @@ def request_loan(request):
             loan.loanAmount = amount
             loan.save()
 
+            message = 'Loan requested'
+            is_error = False
+
     except IntegrityError:
-            print('Transaction failed')
+            message = 'Loan request failed'
+            is_error = True
  
-    return HttpResponseRedirect(reverse('bank_app:index'))
+    return show_index(request, message, is_error)
  
  
 @transaction.atomic
@@ -411,10 +442,10 @@ def accept_loan(request):
         loan_account = loan.loanAccount
  
         try:
-            with transaction.atomic():   
+            with transaction.atomic(): 
+
                 # Loan is confirmed
                 # New positive account movmenet on account that requested loan
-
                 movement_to = AccountMovement()
                 movement_to.account = dest_account[0]
                 movement_to.fromAccount = 'Bank'
@@ -425,22 +456,28 @@ def accept_loan(request):
                 loan.loanAccount = loan_account
                 loan.confirmed = 'true'
                 loan.save()
+
+                message = 'Loan accepted'
+                is_error = False
  
         except IntegrityError:
-            print('Transaction failed')
+            message = 'Loan confirmation failed'
+            is_error = True
  
-    return show_accounts(request, pkcust)
+    return show_accounts(request, pkcust, message, is_error)
  
  
 def decline_loan(request):
     pk = request.POST['lpk']
     pkcust = request.POST['pk_cust']
  
-    loan = LoanRequest.objects.get(pk = pk)
+    loan = LoanRequest.objects.get(pk=pk)
     loan.confirmed = 'false'
     loan.save()
+
+    message = 'Loan declined'
  
-    return show_accounts(request, pkcust)
+    return show_accounts(request, pkcust, message)
  
  
 def del_loan(request):
@@ -453,10 +490,12 @@ def del_loan(request):
  
     loan = get_object_or_404(LoanRequest, pk=pk)
     loan.delete()
+
+    message = 'Loan deleted'   
    
-    return show_accounts(request, pkcust)
+    return show_accounts(request, pkcust, message)
  
- 
+@transaction.atomic
 def generate_card(request):
  
     pkcust = request.POST['pk']
@@ -475,29 +514,42 @@ def generate_card(request):
 
     current_date = datetime.today()
     expiry_date = current_date + timedelta(days=(years*days_per_year))
+
  
     try:
         CreditCard.objects.get(cardNumber = card_number)
-        print('Credit card number already exists')
- 
+        message = 'Credit card number already exists'
+        is_error = True 
     except:
-        card = CreditCard()
-        card.customer = customer
-        card.account = account
-        card.cardNumber = card_number
-        card.initialBalance = card_balance
-        card.expiryDate = expiry_date
-        card.cvvNumber = cvv
-        card.save()
+        is_error = False
+
+    if is_error == False:
+        try:
+            with transaction.atomic():
+                card = CreditCard()
+                card.customer = customer
+                card.account = account
+                card.cardNumber = card_number
+                card.initialBalance = card_balance
+                card.expiryDate = expiry_date
+                card.cvvNumber = cvv
+                card.save()
+        
+                card_movement = CardMovement()
+                card_movement.card = card
+                card_movement.value = 0
+                card_movement.toFrom = 'Bank'
+                card_movement.description = "Initial debt"
+                card_movement.save()
+
+                message = 'Card generated successfully'
+                is_error = False
+
+        except IntegrityError:
+            message = 'Card generation failed'
+            is_error = True            
  
-        card_movement = CardMovement()
-        card_movement.card = card
-        card_movement.value = 0
-        card_movement.toFrom = 'Bank'
-        card_movement.description = "Initial debt"
-        card_movement.save()
- 
-    return show_accounts(request, pkcust)
+    return show_accounts(request, pkcust, message, is_error)
  
 
 def del_card(request):
@@ -506,13 +558,15 @@ def del_card(request):
  
     card = get_object_or_404(CreditCard, pk=pk)
     card.delete()
+
+    message = 'Card deleted successfully'
    
-    return show_accounts(request, pkcust)
+    return show_accounts(request, pkcust, message)
    
  
 @transaction.atomic
 def pay_debt(request):
-    message = 'Success'
+    message = 'Debt payed successfully'
     is_error = False
  
     if request.method == "POST":
@@ -536,7 +590,8 @@ def pay_debt(request):
             converted_amount = amount
 
         if amount <= 0 or converted_amount > abs(remaining_amount):
-            print('The amount you entered is not valid or exceeds the debt')
+            message = 'The amount you entered is not valid or exceeds the debt'
+            is_error = True
        
         elif from_balance > amount:
  
@@ -557,19 +612,19 @@ def pay_debt(request):
                     movement_to.save()
  
             except IntegrityError:
-                message = 'Transaction  failed'
+                message = 'Transaction failed'
                 is_error = True
-                print('Transaction failed')
  
         else:
-            print('Insufficient funds')
+            message = 'Insufficient funds'
+            is_error = True
  
     return show_index(request, message, is_error)
  
  
 @transaction.atomic
 def pay_card(request):
-    message = 'Success'
+    message = 'Card payment successful'
     is_error = False
  
     if request.method == "POST":
@@ -610,10 +665,10 @@ def pay_card(request):
             except IntegrityError:
                 message = 'Transaction  failed'
                 is_error = True
-                print('Transaction failed')
  
         else:
-            print('Insufficient funds')
+            message = 'Insufficient funds'
+            is_error = True
  
     return show_index(request, message, is_error)
  
