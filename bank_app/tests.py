@@ -7,6 +7,7 @@ from .urls import *
 
 class BankTestCase(TestCase):
 
+
     def setUp(self):
         Ranking.objects.create(rType='Gold', loan=True)
         Ranking.objects.create(rType='Silver', loan=True)
@@ -23,7 +24,6 @@ class BankTestCase(TestCase):
             'Bob Pancakes', '', 'bob123'
         ), phone=87654321, ranking=silver)
 
-        
         acc1 = Account.objects.create(customer=user1, accountNumber='acc1')
         acc2 = Account.objects.create(customer=user2, accountNumber='acc2')
 

@@ -11,19 +11,22 @@ from django.conf import settings
 
 from login_app.models import LoginCode
 
+
 def login(request):
     context = {}
     verified = 0
 
     if request.method == "POST":
         user = authenticate(request, username=request.POST['name'], password=request.POST['password'])
-        userType = get_user_type(user)    
+        userType = get_user_type(user)  
+
         if user:
             dj_login(request, user)
 
             if get_user_type(request.user) == 'CUSTOMER':
                 user = Customer.objects.get(user = request.user) 
                 print(user.phone)
+
                 gen_code = random.randint(1000,9999)
                 code = LoginCode()
                 code.code = gen_code
@@ -59,6 +62,7 @@ def login(request):
                 code.code = gen_code
                 code.save()
                 print(code)
+
                 qr = qrcode.QRCode(
                     version=1,
                     error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -67,13 +71,9 @@ def login(request):
                 )
                 qr.add_data(code)
                 qr.make(fit=True)
-
                 img = qr.make_image(fill_color="black", back_color="white")
-
                 print(img)
                 img.save(settings.MEDIA_ROOT/"qr.png")  
-                # return HttpResponseRedirect(reverse('bank_app:index'))
-
                 
                 context = {                                                                             
                     'verified': verified,
@@ -86,14 +86,17 @@ def login(request):
             
         else:
             print('Invalid Login')
+
             context = {                                                                             
                 'error': 'Bad username or password.'
                 }
+
     return render(request, 'login_app/login.html', context)
 
 
 def login_verify(request):
     context = {}
+    
     user_code = int(request.POST['code'])
     codepk = request.POST['codepk']
     code = LoginCode.objects.get(pk = codepk)

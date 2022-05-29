@@ -7,6 +7,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Account, AccountMovement, CurrencyRatio, Currency
 
+
 class ExternalTransaction(APIView):
     def post(self, request, *args, **kwargs):
         
@@ -48,6 +49,7 @@ class ExternalTransaction(APIView):
                     status=rec_code
                 )
 
+
 class CurrencyRatioView(APIView):
     def get(self, request, c1, c2, *args, **kwargs):
 
@@ -67,6 +69,7 @@ class CurrencyRatioView(APIView):
                             {"res": "Not found" },
                             status=status.HTTP_404_NOT_FOUND
                         )
+
 
     def put(self, request, c1, c2, *args, **kwargs):
 

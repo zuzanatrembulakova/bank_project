@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 import pytz
 import requests
 import random
+
 from .views_common import *
 from .models import *
 
@@ -173,6 +174,7 @@ def add_account(request):
         is_error = False
 
     if is_error == False:
+
         try:
             with transaction.atomic(): 
                 account = Account()
@@ -327,6 +329,7 @@ def transfer_money(from_account, amount, description, to_account):
  
         response = requests.post(url, data=data)
         print(response.status_code)
+
         if response.status_code == 200:
             print('Success!')
  
@@ -355,6 +358,7 @@ def transfer_money(from_account, amount, description, to_account):
         if dest_account.isLoan == True and converted_amount > abs(get_balance_for_account(dest_account)):
             message = "The amount you entered is not valid or exceeds the debt"
         else:
+
             try:
                 with transaction.atomic():
                     movement_from = AccountMovement()
@@ -370,7 +374,7 @@ def transfer_money(from_account, amount, description, to_account):
                     movement_to.value = converted_amount
                     movement_to.description = description
                     movement_to.save()
-
+            
             except IntegrityError:
                 is_error = True
                 message = 'Transaction failed'
@@ -682,7 +686,7 @@ def add_interest():
         debt = get_repay_amount_for_card(c)
 
         if debt != 0:
-            interest = (abs(debt)*15)/100
+            interest = (abs(debt)*5)/100
 
             c.interest = c.interest + interest
             c.save()
