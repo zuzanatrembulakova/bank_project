@@ -12,22 +12,25 @@ entity Customer {
   --
   * FK RankingID
   * Name
-  * TelephoneNUmber
   * Password
+  * TelephoneNumber
 }
 
 entity Account {
     * PK ID
     --
     * FK CustomerID
+    * FK CurrencyID
     * AccountNumber
+    * IsLoan
 }
 
 entity AccountMovement {
     * PK ID
     --
     * FK AccountID
-    * Value
+    * FromAccount
+    * Amount
     * Timestamp
     * Description
 }
@@ -39,13 +42,12 @@ entity Bank {
 		* Path
 }
 
-entity Loan{
+entity LoanRequest{
     * PK ID
     --
-    * FK CustomerID
     * FK BankAccountID
+    * LoanAccount
     * LoanAmount
-    * RemainingAmount
     * Confirmed
 }
 
@@ -56,19 +58,30 @@ entity AutomaticPayment{
     * ToAccount
     * Amount
     * Description
-    * RepeatEvery
     * RepeatNumber
+    * RepeatEvery
     * Timestamp
 }
 
 entity CreditCard {
 		* PK ID
 		--
-		* FK CustomerID
+		* FK BankAccountID
 		* CardNumber
+		* Amount
 		* ExpiryDate
 		* CVVNumber
+		* Interest
+}
+
+entity CardMovement {
+		* PK ID
+		--
+		* FK CreditCardID
+		* ToFrom
 		* Amount
+		* Timestamp
+		* Description
 }
 
 entity BankEmployee{
@@ -78,10 +91,34 @@ entity BankEmployee{
     * Password
 }
 
+entity LoginCode{
+    * PK ID
+    --
+    * Code
+}
+
+entity Currency{
+    * PK ID
+    --
+    * Type
+    * Name
+}
+
+entity CurrencyRatio{
+    * PK ID
+    --
+    * FK FromCurrencyID
+    * FK ToCurrencyID
+    * Ratio
+}
+
 Customer |o--{ Account
 Ranking ||--|| Customer
+Currency ||--|| CurrencyRatio
+LoanRequest ||--|| Account
 Account ||--{ AccountMovement
-Customer ||--{ Loan
-Account ||--{ AutomaticPay
-Customer ||--{ CreditCard
+Account |o--{ AutomaticPayment
+Account |o--{ CreditCard
+CreditCard ||--{ CardMovement
+Currency ||--|| Account
 @enduml

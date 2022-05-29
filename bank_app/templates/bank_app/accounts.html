@@ -115,6 +115,7 @@
 
                                         {% elif l.confirmed == 'false' %}
                                             <td>
+                                                Declined
                                                 <button formaction="{% url 'bank_app:del_loan' %}" class="icon_btn del_btn">
                                                     <i class="fa-solid fa-trash"></i>
                                                 </button>

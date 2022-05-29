@@ -81,8 +81,15 @@ def create_customer(request):
         phone = request.POST['phone']
  
         user = User.objects.create_user(user_name, email=None, password=password)
-       
-        if user:
+
+        try: 
+            Customer.objects.get(phone=phone)
+            message = "Customer already exists"
+            is_error = True
+        except Exception:
+            is_error = False
+
+        if is_error is False and user:
             customer = Customer()
             customer.ranking = Ranking.objects.get(rType='Basic')
             customer.phone = phone
@@ -91,7 +98,7 @@ def create_customer(request):
 
             message = 'Customer created'
  
-    return show_index(request, message)
+    return show_index(request, message, is_error)
  
  
 def del_customer(request):
