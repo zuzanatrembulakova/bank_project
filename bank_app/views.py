@@ -287,7 +287,7 @@ def do_automatic_payment():
  
         if time < datetime.now(tz):
            
-            if transfer_money(ap.account, ap.value, ap.description, ap.toAccount) == None:
+            if transfer_money(ap.account, float(ap.value), ap.description, ap.toAccount) == None:
                 ap.timestamp = datetime.now(tz)
                 ap.repeatNumber = ap.repeatNumber - 1
                 ap.save()
