@@ -1,0 +1,56 @@
+[
+{
+    "model": "bank_app.currencyratio",
+    "pk": 1,
+    "fields": {
+        "fromCurrency": 1,
+        "toCurrency": 2,
+        "ratio": "0.13"
+    }
+},
+{
+    "model": "bank_app.currencyratio",
+    "pk": 2,
+    "fields": {
+        "fromCurrency": 1,
+        "toCurrency": 3,
+        "ratio": "0.14"
+    }
+},
+{
+    "model": "bank_app.currencyratio",
+    "pk": 3,
+    "fields": {
+        "fromCurrency": 2,
+        "toCurrency": 3,
+        "ratio": "1.07"
+    }
+},
+{
+    "model": "bank_app.currencyratio",
+    "pk": 4,
+    "fields": {
+        "fromCurrency": 3,
+        "toCurrency": 2,
+        "ratio": "0.93"
+    }
+},
+{
+    "model": "bank_app.currencyratio",
+    "pk": 5,
+    "fields": {
+        "fromCurrency": 2,
+        "toCurrency": 1,
+        "ratio": "7.44"
+    }
+},
+{
+    "model": "bank_app.currencyratio",
+    "pk": 6,
+    "fields": {
+        "fromCurrency": 3,
+        "toCurrency": 1,
+        "ratio": "6.93"
+    }
+}
+]

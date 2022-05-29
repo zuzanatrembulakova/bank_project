@@ -1,0 +1,26 @@
+[
+{
+    "model": "bank_app.ranking",
+    "pk": 1,
+    "fields": {
+        "rType": "Basic",
+        "loan": false
+    }
+},
+{
+    "model": "bank_app.ranking",
+    "pk": 2,
+    "fields": {
+        "rType": "Silver",
+        "loan": true
+    }
+},
+{
+    "model": "bank_app.ranking",
+    "pk": 3,
+    "fields": {
+        "rType": "Gold",
+        "loan": true
+    }
+}
+]

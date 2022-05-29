@@ -1,0 +1,26 @@
+[
+{
+    "model": "bank_app.currency",
+    "pk": 1,
+    "fields": {
+        "type": "DKK",
+        "name": "Danish Krone"
+    }
+},
+{
+    "model": "bank_app.currency",
+    "pk": 2,
+    "fields": {
+        "type": "EUR",
+        "name": "Euro"
+    }
+},
+{
+    "model": "bank_app.currency",
+    "pk": 3,
+    "fields": {
+        "type": "USD",
+        "name": "United States Dollar"
+    }
+}
+]
