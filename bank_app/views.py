@@ -50,10 +50,9 @@ def show_index(request, message = '', is_error = False):
                 balance = round(get_balance_for_account(a), 2)   
                 balances.append((a.pk, balance, a.currency))
 
-                try:
-                    cards.append(CreditCard.objects.get(account=a))
-                except Exception:
-                    pass
+                a_cards = CreditCard.objects.filter(account=a)
+                for ac in a_cards.iterator():
+                    cards.append(ac)
 
                 try:
                     loans.append(LoanRequest.objects.get(loanAccount=a))
