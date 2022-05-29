@@ -36,6 +36,7 @@ class Customer(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.phone}"
 
+
 class Account(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, default=1)
@@ -44,6 +45,7 @@ class Account(models.Model):
 
     def __str__(self):
         return f"{self.accountNumber}"
+
 
 class AccountMovement(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -55,12 +57,14 @@ class AccountMovement(models.Model):
     def __str__(self):
         return f"{self.value} - {self.timestamp} - {self.description}"
 
+
 class Bank(models.Model):
     bankCode = models.CharField(max_length=4)
     path = models.CharField(max_length=250)
     
     def __str__(self):
         return f"{self.bankCode} - {self.path}"
+
 
 class LoanRequest(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE) 
@@ -71,6 +75,7 @@ class LoanRequest(models.Model):
 
     def __str__(self):
         return f"{self.account} - {self.loanAmount} - {self.remainingAmount} - {self.confirmed}"
+
 
 class AutomaticPayment(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -84,6 +89,7 @@ class AutomaticPayment(models.Model):
     def __str__(self):
         return f"{self.account} - {self.toAccount} - {self.value} - {self.repeatNumber} - {self.timestamp}"
 
+
 class CreditCard(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -95,6 +101,7 @@ class CreditCard(models.Model):
 
     def __str__(self):
         return f"{self.cardNumber} - {self.initialBalance} - {self.expiryDate} - {self.interest}"
+        
 
 class CardMovement(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE)
