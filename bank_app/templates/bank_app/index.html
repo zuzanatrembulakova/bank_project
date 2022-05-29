@@ -230,7 +230,7 @@
 											</button>
 										{% else %}
 											{% for l in loans %}
-												{% if l.loanAccount == a.accountNumber %}
+												{% if l.loanAccount.accountNumber == a.accountNumber %}
 												<p>Loan status:
 													{% if l.confirmed == 'true' %}
 														{% for b in balances %}

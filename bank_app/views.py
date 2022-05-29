@@ -42,19 +42,29 @@ def show_index(request, message = '', is_error = False):
         if get_user_type(request.user) == 'CUSTOMER':
             active_customer = Customer.objects.get(user=request.user)
             customer_accounts = Account.objects.filter(customer=active_customer)
-            loans = LoanRequest.objects.filter(customer=active_customer)
-            cards = CreditCard.objects.filter(customer=active_customer)
  
             balances = []
+            loans = []
+            cards = []
             for a in customer_accounts.iterator():
-                balance = round(get_balance_for_account(a), 2)
+                balance = round(get_balance_for_account(a), 2)   
                 balances.append((a.pk, balance, a.currency))
+
+                try:
+                    cards.append(CreditCard.objects.get(account=a))
+                except Exception:
+                    pass
+
+                try:
+                    loans.append(LoanRequest.objects.get(loanAccount=a))
+                except Exception:
+                    pass
             
             card_repay_balances = []
-            for c in cards.iterator():
+            for c in cards:
                 card_repay_balance = round(get_repay_amount_for_card(c), 2)
                 card_repay_balances.append((c.pk, card_repay_balance))
-           
+
             context['customer_accounts'] = customer_accounts
             context['active_customer'] = active_customer
             context['balances'] = balances
@@ -125,19 +135,29 @@ def show_accounts(request, pkcust, message = '', is_error = False):
         customer = get_object_or_404(Customer, pk=pkcust)
         currencies = Currency.objects.all() 
         accounts = Account.objects.filter(customer=customer)
-        loans = LoanRequest.objects.filter(customer=customer)
-        cards = CreditCard.objects.filter(customer=customer)
  
         balances = []
+        loans = []
+        cards = []
         for a in accounts.iterator():
-            balance = round(get_balance_for_account(a), 2)
+            balance = round(get_balance_for_account(a), 2)   
             balances.append((a.pk, balance, a.currency))
+
+            a_cards = CreditCard.objects.filter(account=a)
+            for ac in a_cards.iterator():
+                cards.append(ac)
+
+            try:
+                loans.append(LoanRequest.objects.get(loanAccount=a))
+            except Exception:
+                pass
        
         card_repay_balances = []
-        for c in cards.iterator():
+        for c in cards:
             card_repay_balance = round(get_repay_amount_for_card(c), 2)
-            account = Account.objects.get(accountNumber=c.account)
-            card_repay_balances.append((c.pk, card_repay_balance, account.currency))
+            card_repay_balances.append((c.pk, card_repay_balance, c.account.currency))
+
+        print(cards)
  
         context = {
                 'usertype': get_user_type(request.user),
@@ -414,9 +434,8 @@ def request_loan(request):
             account_movement.save()
 
             loan = LoanRequest()
-            loan.customer = customer
             loan.account = Account.objects.get(pk=pk)
-            loan.loanAccount = Account.objects.get(accountNumber=loan_account)
+            loan.loanAccount = account
             loan.loanAmount = amount
             loan.save()
 
@@ -436,14 +455,8 @@ def accept_loan(request):
     if request.method == "POST":
         pk = request.POST['lpk']
         pkcust = request.POST['pk_cust']
-
-        amount = float(request.POST['loan_amount'])
-
-        to_account = request.POST['to_account']
-        dest_account = Account.objects.filter(accountNumber=to_account)
         
         loan = LoanRequest.objects.get(pk=pk)
-        loan_account = loan.loanAccount
  
         try:
             with transaction.atomic(): 
@@ -451,13 +464,12 @@ def accept_loan(request):
                 # Loan is confirmed
                 # New positive account movmenet on account that requested loan
                 movement_to = AccountMovement()
-                movement_to.account = dest_account[0]
+                movement_to.account = loan.account
                 movement_to.fromAccount = 'Bank'
-                movement_to.value = amount
+                movement_to.value = loan.loanAmount
                 movement_to.description = 'Loan'
                 movement_to.save()
  
-                loan.loanAccount = loan_account
                 loan.confirmed = 'true'
                 loan.save()
 
@@ -487,39 +499,36 @@ def decline_loan(request):
 def del_loan(request):
     pk = request.POST['lpk']
     pkcust = request.POST['pk_cust']
-    loan_acc_number = request.POST['loan_account']
 
-    account = get_object_or_404(Account, accountNumber=loan_acc_number)
-    account.delete()
- 
     loan = get_object_or_404(LoanRequest, pk=pk)
+    loan.loanAccount.delete()
+        
     loan.delete()
 
     message = 'Loan deleted'   
    
     return show_accounts(request, pkcust, message)
  
+
 @transaction.atomic
 def generate_card(request):
  
-    pkcust = request.POST['pk']
+    pkcust = request.POST['pkcust']
     accountpk = request.POST['card_account']
  
     years = 5
     days_per_year = 365.24
  
-    customer = get_object_or_404(Customer, pk=pkcust)
     account = get_object_or_404(Account, pk=accountpk)
 
     card_number = random.randint(1000000000000000,9999999999999999)
     cvv = random.randint(100,999)
 
     card_balance = float(request.POST['initial_card_balance'])
-
+    print(account, card_balance)
     current_date = datetime.today()
     expiry_date = current_date + timedelta(days=(years*days_per_year))
 
- 
     try:
         CreditCard.objects.get(cardNumber = card_number)
         message = 'Credit card number already exists'
@@ -531,7 +540,6 @@ def generate_card(request):
         try:
             with transaction.atomic():
                 card = CreditCard()
-                card.customer = customer
                 card.account = account
                 card.cardNumber = card_number
                 card.initialBalance = card_balance

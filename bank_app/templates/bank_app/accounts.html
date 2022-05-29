@@ -95,11 +95,8 @@
                             </td>
                             {% if a.isLoan == True %}
                                 {% for l in loans %}
-                                    {% if l.loanAccount == a.accountNumber %}
+                                    {% if l.loanAccount == a %}
                                         <input type="hidden" name="lpk" value="{{ l.pk }}" />
-                                        <input type="hidden" name="to_account" value="{{ l.account }}" />
-                                        <input type="hidden" name="loan_amount" value="{{ l.loanAmount }}" />
-                                        <input type="hidden" name="loan_account" value="{{ l.loanAccount }}" />
 
                                         {% if l.confirmed == 'true' %}
                                             {% for b in balances %}
@@ -152,7 +149,6 @@
             <h3>Add credit card for {{ customer.user.username }}</h3>
             <form method="post">
                 {% csrf_token %}
-                <input type="hidden" name="pk" value="{{ a.pk }}" />
                 <div class="form_item_wrapper">
                     <label>For account</label>
                     <select name="card_account">
@@ -168,7 +164,7 @@
                     <label>Initial Balance</label>
                     <input type="number" name="initial_card_balance" placeholder="Set Initial Credit Card Balance" step=".01"/>
                 </div>
-                <input type="hidden" name="pk" value="{{ customer.pk }}" />
+                <input type="hidden" name="pkcust" value="{{ customer.pk }}" />
                 <button formaction="{% url 'bank_app:generate_card' %}" class="btn" id="generate_card_btn">Generate card</button>
             </form>
         </section>

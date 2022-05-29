@@ -67,14 +67,13 @@ class Bank(models.Model):
 
 
 class LoanRequest(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE) 
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    loanAccount = models.CharField(max_length=250, default='undefined')
+    loanAccount = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='loanAccount')
     loanAmount = models.DecimalField(max_digits=30, decimal_places=2)
     confirmed = models.CharField(max_length=100, default='undefined')
 
     def __str__(self):
-        return f"{self.account} - {self.loanAmount} - {self.remainingAmount} - {self.confirmed}"
+        return f"{self.account} - {self.loanAmount} - {self.loanAccount} - {self.confirmed}"
 
 
 class AutomaticPayment(models.Model):
@@ -91,7 +90,6 @@ class AutomaticPayment(models.Model):
 
 
 class CreditCard(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     cardNumber = models.IntegerField()
     initialBalance = models.DecimalField(max_digits=30, decimal_places=2)
@@ -100,7 +98,7 @@ class CreditCard(models.Model):
     interest = models.DecimalField(max_digits=30, decimal_places=2, default=0)
 
     def __str__(self):
-        return f"{self.cardNumber} - {self.initialBalance} - {self.expiryDate} - {self.interest}"
+        return f"{self.account.accountNumber} - {self.cardNumber} - {self.initialBalance} - {self.expiryDate} - {self.interest}"
         
 
 class CardMovement(models.Model):
