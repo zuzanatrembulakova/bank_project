@@ -1,10 +1,9 @@
-from locale import currency
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.shortcuts import get_object_or_404
+from .views_common import *
 from .models import Account, AccountMovement, CurrencyRatio, Currency
 
 
@@ -60,9 +59,9 @@ class CurrencyRatioView(APIView):
             currency = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=to_currency)
             
             return Response(
-                        {"res": currency.ratio },
-                        status=status.HTTP_200_OK
-                    )
+                            {"res": currency.ratio },
+                            status=status.HTTP_200_OK
+                        )
 
         except Exception:
             return Response(
@@ -73,22 +72,28 @@ class CurrencyRatioView(APIView):
 
     def put(self, request, c1, c2, *args, **kwargs):
 
-        try:
-            from_currency = Currency.objects.get(type=c1)
-            to_currency = Currency.objects.get(type=c2)
+        if request.user.is_authenticated and get_user_type(request.user) == 'BANKER':
+            try:
+                from_currency = Currency.objects.get(type=c1)
+                to_currency = Currency.objects.get(type=c2)
 
-            currency = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=to_currency)
-            
-            currency.ratio = request.data.get('ratio')
-            currency.save()
+                currency = CurrencyRatio.objects.get(fromCurrency=from_currency, toCurrency=to_currency)
+                
+                currency.ratio = request.data.get('ratio')
+                currency.save()
 
+                return Response(
+                                {"res": 'OK' },
+                                status=status.HTTP_200_OK
+                            )
+
+            except Exception:
+                return Response(
+                                {"res": "Not found" },
+                                status=status.HTTP_404_NOT_FOUND
+                            )
+        else:
             return Response(
-                        {"res": 'OK' },
-                        status=status.HTTP_200_OK
-                    )
-
-        except Exception:
-            return Response(
-                            {"res": "Not found" },
-                            status=status.HTTP_404_NOT_FOUND
-                        )
+                            {"res": "Access denied" },
+                            status=status.HTTP_403_FORBIDDEN
+                            )
