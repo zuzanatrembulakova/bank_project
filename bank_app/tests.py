@@ -24,8 +24,8 @@ class BankTestCase(TestCase):
             'Bob Pancakes', '', 'bob123'
         ), phone=87654321, ranking=silver)
 
-        acc1 = Account.objects.create(customer=user1, accountNumber='acc1')
-        acc2 = Account.objects.create(customer=user2, accountNumber='acc2')
+        Account.objects.create(customer=user1, accountNumber='acc1')
+        Account.objects.create(customer=user2, accountNumber='acc2')
 
 
     def test_create_customer(self):
@@ -101,77 +101,3 @@ class BankTestCase(TestCase):
         accmv2 = AccountMovement.objects.filter(account=acc2)
         self.assertTrue(accmv1[0].value + accmv1[1].value == 900)
         self.assertTrue(accmv2[0].value + accmv2[1].value == 1100)
-
-    
-    def test_request_loan(self):
-        c = Client()
-
-        user = Customer.objects.get(phone=12345678)
-        acc = Account.objects.get(customer=user)
-
-        c.login(username='Adela Banasova', password='adela123')
-
-        data = {
-            'pk': acc.pk,
-            'loan_amount': '1000',
-        }
-
-        c.post(reverse('bank_app:request_loan'), data, follow=True)
-        self.assertTrue(Loan.objects.get(account=acc))
-
-
-    def test_accept_loan(self):
-        c = Client()
-
-        user = Customer.objects.get(phone=12345678)
-        acc = Account.objects.get(customer=user)
-        loan = Loan.objects.create(customer=user, account=acc, loanAmount=1000, remainingAmount=1000)
-
-        data = {
-            'pk': loan.pk,
-            'pkcust': user.pk,
-            'loan_amount': 100,
-            'to_account': acc.accountNumber,
-        }
-
-        c.post(reverse('bank_app:accept_loan'), data, follow=True)
-        loan = Loan.objects.get(pk=loan.pk)
-        self.assertTrue(loan.confirmed == 'true')
-
-
-    def test_decline_loan(self):
-        c = Client()
-
-        user = Customer.objects.get(phone=12345678)
-        acc = Account.objects.get(customer=user)
-        loan = Loan.objects.create(customer=user, account=acc, loanAmount=1000, remainingAmount=1000)
-
-        data = {
-            'pk': loan.pk,
-            'pkcust': user.pk,
-        }
-
-        c.post(reverse('bank_app:decline_loan'), data, follow=True)
-        loan = Loan.objects.get(pk=loan.pk)
-        self.assertTrue(loan.confirmed == 'false')
-
-    
-    def test_pay_loan(self):
-        c = Client()
-
-        user = Customer.objects.get(phone=12345678)
-        acc = Account.objects.get(customer=user)
-        accmv = AccountMovement.objects.create(account=acc, value=1000, description='Initial balance')
-        loan = Loan.objects.create(customer=user, account=acc, loanAmount=1000, remainingAmount=1000)
-
-        data = {
-            'pk': loan.pk,
-            'account': acc,
-            'remaining_amount': loan.remainingAmount,
-            'loan_transfer': 500,
-        }
-
-        c.post(reverse('bank_app:pay_loan'), data, follow=True)
-        loan = Loan.objects.get(pk=loan.pk)
-        self.assertTrue(loan.remainingAmount == 500)
-

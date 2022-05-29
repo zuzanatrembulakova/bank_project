@@ -18,7 +18,6 @@ def login(request):
 
     if request.method == "POST":
         user = authenticate(request, username=request.POST['name'], password=request.POST['password'])
-        userType = get_user_type(user)  
 
         if user:
             dj_login(request, user)
@@ -81,8 +80,7 @@ def login(request):
                     'usertype': get_user_type(request.user),
                     }
 
-            print(f"Logged in as {userType}")
-            # nestaci nam len userType, potrebujeme aj get_user_type(request.user)?
+            print(f"Logged in as {get_user_type(request.user)}")
             
         else:
             print('Invalid Login')
@@ -95,18 +93,12 @@ def login(request):
 
 
 def login_verify(request):
-    context = {}
-    
     user_code = int(request.POST['code'])
     codepk = request.POST['codepk']
     code = LoginCode.objects.get(pk = codepk)
 
     if user_code != int(code.code):
-        verify_error = 'Wrong code'
         print('Error') 
-        context = {              
-            'verify_error': verify_error,
-            }
         return logout(request)
     else:
         code.delete()
