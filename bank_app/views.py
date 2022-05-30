@@ -652,43 +652,48 @@ def pay_card(request):
         from_card = CreditCard.objects.get(pk=from_cardpk)
 
         to_account = request.POST['to_account']
-        dest_account = Account.objects.get(accountNumber=to_account)
 
-        balance = from_card.initialBalance
-        amount = float(request.POST['card_pay'])
-        description = request.POST['card_desc']
- 
-        if balance > amount:
+        try:
+            dest_account = Account.objects.get(accountNumber=to_account)
 
-            if from_card.account.currency != dest_account.currency:
-                currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_card.account.currency, toCurrency=dest_account.currency)
-                converted_amount = amount * float(currency_ratio.ratio)
+            balance = from_card.initialBalance
+            amount = float(request.POST['card_pay'])
+            description = request.POST['card_desc']
+    
+            if balance > amount:
+
+                if from_card.account.currency != dest_account.currency:
+                    currency_ratio = CurrencyRatio.objects.get(fromCurrency=from_card.account.currency, toCurrency=dest_account.currency)
+                    converted_amount = amount * float(currency_ratio.ratio)
+                else:
+                    converted_amount = amount
+
+                try:
+                    with transaction.atomic():
+                        movement_from = CardMovement()
+                        movement_from.card = from_card
+                        movement_from.toFrom = dest_account
+                        movement_from.value = -amount
+                        movement_from.description = description
+                        movement_from.save()
+    
+                        movement_from = AccountMovement()
+                        movement_from.account = dest_account
+                        movement_from.fromAccount = f"{from_card.cardNumber} (credit card)"
+                        movement_from.value = converted_amount
+                        movement_from.description = description
+                        movement_from.save()
+    
+                except IntegrityError:
+                    message = 'Transaction  failed'
+                    is_error = True
+    
             else:
-                converted_amount = amount
-
-            try:
-                with transaction.atomic():
-                    movement_from = CardMovement()
-                    movement_from.card = from_card
-                    movement_from.toFrom = dest_account
-                    movement_from.value = -amount
-                    movement_from.description = description
-                    movement_from.save()
- 
-                    movement_from = AccountMovement()
-                    movement_from.account = dest_account
-                    movement_from.fromAccount = f"{from_card.cardNumber} (credit card)"
-                    movement_from.value = converted_amount
-                    movement_from.description = description
-                    movement_from.save()
- 
-            except IntegrityError:
-                message = 'Transaction  failed'
+                message = 'Insufficient funds'
                 is_error = True
- 
-        else:
-            message = 'Insufficient funds'
+        except Exception:
             is_error = True
+            message = 'Something went wrong'
  
     return show_index(request, message, is_error)
  
