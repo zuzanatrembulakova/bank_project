@@ -107,9 +107,8 @@
 
 			<section id="currency_rate">
 				<h3>Manage currrency rate</h3>
-				<form method="post">
-					{% csrf_token %}
-					
+				<div>
+										
 					<div class="form_item_wrapper">
 						<label>From</label>
 						<select name="from_currency" id="from_currency" onchange="curenncyChange()">
@@ -135,7 +134,7 @@
 					</div>
 					
 					<button class="btn" onclick="updateRate()">Update rate</button>
-				</form>
+				</div>
 			</section>
 		</main>
 		{% else %}

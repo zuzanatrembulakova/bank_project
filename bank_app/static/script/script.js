@@ -91,13 +91,18 @@ function updateRate(){
             method: "PUT",
             credentials: 'same-origin',
             headers:{
-    
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest', 
                 'X-CSRFToken': getCookie('csrftoken'),
             },
             body: JSON.stringify(obj)
+        }).then(response => {
+            if (response.status == 200){
+                alert("Rate changed successfully");
+            } else {
+                alert("Server error");
+            }
         })
     }
 }

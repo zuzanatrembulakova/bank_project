@@ -1,8 +1,6 @@
-from email import message
-from django.shortcuts import render, get_object_or_404, reverse
-from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.db import IntegrityError, transaction
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
  
 import pytz
