@@ -80,8 +80,6 @@ def create_customer(request):
         password = request.POST['password']
         phone = request.POST['phone']
  
-        user = User.objects.create_user(user_name, email=None, password=password)
-
         try: 
             Customer.objects.get(phone=phone)
             message = "Customer already exists"
@@ -89,7 +87,9 @@ def create_customer(request):
         except Exception:
             is_error = False
 
-        if is_error is False and user:
+        if is_error is False:
+            user = User.objects.create_user(user_name, email=None, password=password)
+
             customer = Customer()
             customer.ranking = Ranking.objects.get(rType='Basic')
             customer.phone = phone
