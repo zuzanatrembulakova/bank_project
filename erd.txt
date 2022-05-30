@@ -46,7 +46,7 @@ entity LoanRequest{
     * PK ID
     --
     * FK BankAccountID
-    * LoanAccount
+    * FK LoanAccountID
     * LoanAmount
     * Confirmed
 }
