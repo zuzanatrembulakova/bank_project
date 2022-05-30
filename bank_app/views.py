@@ -339,38 +339,43 @@ def transfer_money(from_account, amount, description, to_account):
  
     if not dest_account:
         bank_code = to_account[0:4]
- 
-        bank = Bank.objects.get(bankCode = bank_code)
-        url = 'http://' + bank.path + '/bank_app/api/external_transaction/'
-        print(url)
- 
-        data = {
-                "to_account": to_account,
-                "from_account": from_account_number,
-                "from_currency": from_account.currency,
-                "amount": amount,
-                "description": description,
-                }
-        print(data)
- 
-        response = requests.post(url, data=data)
-        print(response.status_code)
 
-        if response.status_code == 200:
-            print('Success!')
+        try:
+            bank = Bank.objects.get(bankCode = bank_code)
+            url = 'http://' + bank.path + '/bank_app/api/external_transaction/'
+            print(url)
  
-            account_movement = AccountMovement()
-            account_movement.account = from_account
-            account_movement.fromAccount = to_account
-            account_movement.value = -amount
-            account_movement.description = description
-            account_movement.save()
- 
-            message = response.json()['res']
-        elif response.status_code == 404:
-            print('Not Found.')
-            is_error = True
-            message = response.json()['res']
+            data = {
+                    "to_account": to_account,
+                    "from_account": from_account_number,
+                    "from_currency": from_account.currency,
+                    "amount": amount,
+                    "description": description,
+                    }
+            print(data)
+    
+            response = requests.post(url, data=data)
+            print(response.status_code)
+
+            if response.status_code == 200:
+                print('Success!')
+    
+                account_movement = AccountMovement()
+                account_movement.account = from_account
+                account_movement.fromAccount = to_account
+                account_movement.value = -amount
+                account_movement.description = description
+                account_movement.save()
+    
+                message = response.json()['res']
+            elif response.status_code == 404:
+                print('Not Found.')
+                is_error = True
+                message = response.json()['res']
+
+        except Exception:
+            is_error= True
+            message = 'Invalid bank account'
  
     else:
         # Dest account exists in our bank
