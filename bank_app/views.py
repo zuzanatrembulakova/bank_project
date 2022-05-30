@@ -592,8 +592,7 @@ def pay_debt(request):
         card = CreditCard.objects.get(pk=pk)
         dest_currency = card.account.currency
 
-        from_accountpk = request.POST['from_account']
-        from_account = Account.objects.get(pk=from_accountpk)
+        from_account = Account.objects.get(pk=card.account.pk)
         from_currency = from_account.currency
        
         amount = float(request.POST['card_repay'])
