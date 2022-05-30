@@ -49,7 +49,7 @@ function curenncyChange(){
         let c2 = one("#to_currency").value
 
         if (c1 != c2){
-            fetch("api/currency_ratio/" + c1 + "/" + c2, {
+            fetch("/bank_app/api/currency_ratio/" + c1 + "/" + c2, {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers:{
@@ -87,7 +87,7 @@ function updateRate(){
     obj.ratio = new_rate
 
     if (new_rate != ''){
-        fetch("api/currency_ratio/" + c1 + "/" + c2, {
+        fetch("/bank_app/api/currency_ratio/" + c1 + "/" + c2, {
             method: "PUT",
             credentials: 'same-origin',
             headers:{
